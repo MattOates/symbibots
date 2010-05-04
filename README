@@ -1,0 +1,22 @@
+To start the Symbibots software do the following:
+
+***Install Sun Java JDK 1.6+ before attempting any of the following!***
+
+ON WINDOWS
+Depending on your setup you will need to do one of the following:
+
+	Via the GUI
+		1.) Navigate to the Symbibots folder this file is located in
+		2.) Double click the autorun.bat file
+
+	Via CMD
+		1.) Start->Run and enter "cmd" into the prompt
+		2.) Now use the "cd" command to move to the download directory for e.g.	"cd %HOMEPATH%\Downloads\Symbibots"
+		3.) ./autorun.bat
+
+ON LINUX AND OSX
+In a terminal navigate to the Symbibots directory e.g. `cd ~/Downloads/Symbibots` now execute the `./autorun.sh` script
+
+
+ALL OTHER SYSTEMS
+From the Symbibots download directory run the command `java -cp . ui.MainWindow`

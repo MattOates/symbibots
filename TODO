@@ -1,0 +1,13 @@
+In General:
+	* Update the whole framework to be more general
+	* Introduce the idea of sensors and actuators as components of an agent, towards simple real world robot simulation
+	* Implement some more interesting objects for the world and effects on agents
+	* Improve collision physics, and smoothness of animation
+
+Implement in ga/crossover:
+	* All crossover other than SinglePoint
+
+Implement in ga/selection:
+	* SUS
+	* Random
+	* Truncation
