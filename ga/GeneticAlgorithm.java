@@ -1,10 +1,11 @@
 package ga;
 
-import game.Agent;
-import game.EntityManager;
-import game.World;
 import java.util.LinkedList;
 import java.util.Random;
+
+import sim.Agent;
+import sim.EntityManager;
+import sim.World;
 
 /**
  * The top level GA class, used by other interested classes to interact with the GA.

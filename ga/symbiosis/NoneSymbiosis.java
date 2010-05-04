@@ -2,8 +2,9 @@ package ga.symbiosis;
 
 import java.util.LinkedList;
 
+import sim.Agent;
+
 import ga.Symbiosis;
-import game.Agent;
 
 /**
  * Added to allow the None menu selection, does not perform any symbiosis on the population.

@@ -1,4 +1,4 @@
-package game;
+package sim.entities;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,6 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.ImageIcon;
+
+import sim.Agent;
+import sim.Entity;
+import sim.EntityManager;
+import sim.agents.UserAgent;
 
 /**
  * The Missile entity fired by agents, carries a certain amount of the Agents energy as a payload.

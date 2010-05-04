@@ -1,9 +1,9 @@
 package ga.genes;
 
+import sim.Agent;
+import sim.Entity;
+import sim.Force;
 import ga.Gene;
-import game.Agent;
-import game.Entity;
-import game.Force;
 
 /**
  * Apply a force right on the parent agent.
@@ -14,7 +14,7 @@ public class RightForceGene extends Gene implements Force {
 	public RightForceGene(){}
 
 	/**
-	 * @see ga.Gene#express(game.Agent, ga.Gene)
+	 * @see ga.Gene#express(sim.Agent, ga.Gene)
 	 */
 	@Override
 	public void express(Agent agent, Gene next) {
@@ -48,7 +48,7 @@ public class RightForceGene extends Gene implements Force {
 	}
 
 	/**
-	 * @see game.Force#getYComponent()
+	 * @see sim.Force#getYComponent()
 	 */
 	public double getYComponent() {
 		//No Y component
@@ -56,7 +56,7 @@ public class RightForceGene extends Gene implements Force {
 	}
 
 	/**
-	 * @see game.Force#applyForce(game.Entity)
+	 * @see sim.Force#applyForce(sim.Entity)
 	 */
 	public void applyForce(Entity entity) {
 		//Only change the X component of the Entity

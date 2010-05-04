@@ -1,16 +1,17 @@
 package ga;
 
-import game.Agent;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
+
+import sim.Agent;
 
 /**
  * A Chromosome acted upon by the GA, an Agent contains a LinkedList of these ojects
  * as its "genome". The Chromosome is a wrapper around a LinkedList of Genes.
  * @author  Matt Oates
  * @see ga.Gene
- * @see game.Agent
+ * @see sim.Agent
  */
 public class Chromosome implements Cloneable {
 	

@@ -1,4 +1,4 @@
-package game;
+package sim;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -8,6 +8,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 
+import sim.agents.UserAgent;
+import sim.entities.EnergyPacket;
 import ui.MainWindow;
 import vis.Visualisable;
 import ga.GeneticAlgorithm;

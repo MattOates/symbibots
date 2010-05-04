@@ -1,4 +1,4 @@
-package game;
+package sim;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

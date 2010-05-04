@@ -1,10 +1,10 @@
 package ga.crossover;
 
+import sim.World;
 import ga.Chromosome;
 import ga.Crossover;
 import ga.Gene;
 import ga.GeneticAlgorithm;
-import game.World;
 
 /**
  * An implementation of single point crossover, a single loci is found on both 

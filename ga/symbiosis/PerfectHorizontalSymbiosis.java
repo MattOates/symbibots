@@ -2,10 +2,11 @@ package ga.symbiosis;
 
 import java.util.LinkedList;
 
+import sim.Agent;
+
 import ga.Chromosome;
 import ga.GeneticAlgorithm;
 import ga.Symbiosis;
-import game.Agent;
 
 /**
  * An implementation of the Symbiosis operator.

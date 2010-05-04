@@ -1,4 +1,4 @@
-package game;
+package sim.entities;
 
 import ga.GeneticAlgorithm;
 
@@ -9,6 +9,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.ImageIcon;
+
+import sim.Agent;
+import sim.Entity;
+import sim.EntityManager;
+
 
 /**
  * An energy packet found in the Symbibots world.

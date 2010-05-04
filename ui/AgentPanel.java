@@ -9,8 +9,6 @@ import java.util.ListIterator;
 
 import ga.Chromosome;
 import ga.Gene;
-import game.Agent;
-import game.UserAgent;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,6 +18,9 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
+
+import sim.Agent;
+import sim.agents.UserAgent;
 
 /**
  * The main Agent GUI widget, created and maintained by the respective agent.

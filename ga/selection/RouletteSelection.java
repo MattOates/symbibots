@@ -3,10 +3,11 @@ package ga.selection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import sim.Agent;
+import sim.World;
+
 import ga.GeneticAlgorithm;
 import ga.Selection;
-import game.Agent;
-import game.World;
 
 /**
  * An implementation of Fitness proportionate selection, total fitness in the population is calculated

@@ -1,13 +1,14 @@
-package game;
+package sim;
 
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.LinkedList;
 
+
 /**
  * The manager class used by World to deligate en mass Entity operations like update().
  * @author Matt Oates
- * @see game.World
+ * @see sim.World
  */
 public class EntityManager {
 	

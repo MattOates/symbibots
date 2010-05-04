@@ -2,9 +2,10 @@ package ga.selection;
 
 import java.util.LinkedList;
 
+import sim.Agent;
+
 import ga.GeneticAlgorithm;
 import ga.Selection;
-import game.Agent;
 
 /**
  * An implementation of Stochastic Universal Sampling.

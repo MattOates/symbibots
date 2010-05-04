@@ -2,9 +2,10 @@ package ga.genes;
 
 import java.awt.geom.Point2D;
 
+import sim.Agent;
+import sim.entities.Missile;
+
 import ga.Gene;
-import game.Agent;
-import game.Missile;
 
 /**
  * Create and fire a missile Entity on the current heading of the parent Agent.
@@ -18,7 +19,7 @@ public class FireMissileAheadGene extends Gene {
 	public FireMissileAheadGene(){}
 	
 	/**
-	 * @see ga.Gene#express(game.Agent, ga.Gene)
+	 * @see ga.Gene#express(sim.Agent, ga.Gene)
 	 */
 	@Override
 	public void express(Agent agent, Gene next) {

@@ -1,7 +1,7 @@
 package ga.genes;
 
+import sim.Agent;
 import ga.Gene;
-import game.Agent;
 
 /**
  * Always inhibit the next gene along.

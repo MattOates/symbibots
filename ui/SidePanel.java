@@ -1,7 +1,5 @@
 package ui;
 
-import game.Agent;
-import game.UserAgent;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -10,6 +8,9 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
+import sim.Agent;
+import sim.agents.UserAgent;
 
 /**
  * Main tabbed container for holding user panels.

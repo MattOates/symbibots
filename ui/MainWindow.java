@@ -2,9 +2,6 @@ package ui;
 
 import ga.Chromosome;
 import ga.GeneticAlgorithm;
-import game.Agent;
-import game.UserAgent;
-import game.World;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -23,6 +20,9 @@ import java.util.NoSuchElementException;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
+import sim.Agent;
+import sim.World;
+import sim.agents.UserAgent;
 import vis.VisualisationPanel;
 
 /**
@@ -36,7 +36,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	private static final long serialVersionUID = 382592117767573017L;
 	
-	private static final String VERSION = "0.9";
+	private static final String VERSION = "0.9.1";
 	
 	/**
 	 * VisualisationPanel, panel rendering the game graphics.
@@ -167,9 +167,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		else if (e.getActionCommand() == "About") {
 			JOptionPane.showMessageDialog(this,
 					 "Symbibots v"+VERSION
-					+"\nCreated by Matt Oates"
-					+"\nUniversity of Wales, Aberystwyth (2007)"
-					+"\n\nmattoates.co.uk\nmattoates@gmail.com"
+					+"\n\n©Matt Oates 2010\nmattoates@gmail.com"
+					+"\n\nhttp://launchpad.net/symbibots"
 					,"About",JOptionPane.PLAIN_MESSAGE);
 		}		
 		else if (e.getActionCommand() == "View Agent") {

@@ -1,7 +1,6 @@
 package vis;
 
 import ga.GeneticAlgorithm;
-import game.World;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,6 +8,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
+import sim.World;
 import ui.MainWindow;
 
 /**

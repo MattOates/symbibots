@@ -1,8 +1,9 @@
 package ga;
 
-import game.Agent;
 
 import java.util.LinkedList;
+
+import sim.Agent;
 
 /**
  * The top level interface that defines Selection operators.

@@ -1,4 +1,4 @@
-package game;
+package sim;
 
 /**
  * A convenient interface for dealing with genes and other objects that can apply a force.

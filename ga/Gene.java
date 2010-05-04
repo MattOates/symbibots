@@ -1,7 +1,7 @@
 package ga;
 
+import sim.Agent;
 import ui.GenePanel;
-import game.Agent;
 
 /**
  * The abstract Gene defenition, defines what a Gene must be able to do.

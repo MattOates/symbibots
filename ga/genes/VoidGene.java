@@ -1,7 +1,7 @@
 package ga.genes;
 
+import sim.Agent;
 import ga.Gene;
-import game.Agent;
 
 /**
  * A gene that does nothing apart from take up space. This is important for allowing 

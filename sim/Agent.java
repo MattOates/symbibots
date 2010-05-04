@@ -1,4 +1,4 @@
-package game;
+package sim;
 
 import ga.Chromosome;
 import ga.GeneticAlgorithm;
@@ -14,6 +14,8 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import sim.entities.EnergyPacket;
+import sim.entities.Missile;
 import ui.AgentPanel;
 
 /**
@@ -77,7 +79,7 @@ public class Agent extends Entity {
 	
 	/**
 	 * Overridden to allow for distance traveled acounting. 
-	 * @see game.Entity#update()
+	 * @see sim.Entity#update()
 	 */
 	@Override
 	public void update() {
@@ -190,7 +192,7 @@ public class Agent extends Entity {
 
 	/**
 	 * Overridden for specific agent interactions.
-	 * @see game.Entity#collide(game.Entity)
+	 * @see sim.Entity#collide(sim.Entity)
 	 */
 	@Override
 	public void collide(Entity entity) {

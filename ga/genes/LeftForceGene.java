@@ -1,9 +1,9 @@
 package ga.genes;
 
+import sim.Agent;
+import sim.Entity;
+import sim.Force;
 import ga.Gene;
-import game.Agent;
-import game.Entity;
-import game.Force;
 
 /**
  * Apply a force left on the parent agent.
@@ -17,7 +17,7 @@ public class LeftForceGene extends Gene implements Force {
 	public LeftForceGene(){}
 
 	/**
-	 * @see ga.Gene#express(game.Agent, ga.Gene)
+	 * @see ga.Gene#express(sim.Agent, ga.Gene)
 	 */
 	@Override
 	public void express(Agent agent, Gene next) {
@@ -43,7 +43,7 @@ public class LeftForceGene extends Gene implements Force {
 	}
 
 	/**
-	 * @see game.Force#getXComponent()
+	 * @see sim.Force#getXComponent()
 	 */
 	public double getXComponent() {	
 		//Decrease the horizontal velocity dx is -ve for left
@@ -51,7 +51,7 @@ public class LeftForceGene extends Gene implements Force {
 	}
 
 	/**
-	 * @see game.Force#getYComponent()
+	 * @see sim.Force#getYComponent()
 	 */
 	public double getYComponent() {
 		//No Y component
@@ -59,7 +59,7 @@ public class LeftForceGene extends Gene implements Force {
 	}
 
 	/**
-	 * @see game.Force#applyForce(game.Entity)
+	 * @see sim.Force#applyForce(sim.Entity)
 	 */
 	public void applyForce(Entity entity) {
 		//Only change the X component of the Entity

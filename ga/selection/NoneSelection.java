@@ -2,9 +2,10 @@ package ga.selection;
 
 import java.util.LinkedList;
 
+import sim.Agent;
+
 import ga.GeneticAlgorithm;
 import ga.Selection;
-import game.Agent;
 
 /**
  * Added to allow the None menu selection, does not perform any selection on the population.

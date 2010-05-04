@@ -1,7 +1,7 @@
 package ga.genes;
 
+import sim.Agent;
 import ga.Gene;
-import game.Agent;
 
 /**
  * Convert some of the parent agents energy into life.
@@ -15,7 +15,7 @@ public class HealGene extends Gene {
 	public HealGene(){}
 
 	/**
-	 * @see ga.Gene#express(game.Agent, ga.Gene)
+	 * @see ga.Gene#express(sim.Agent, ga.Gene)
 	 */
 	@Override
 	public void express(Agent agent, Gene next) {
