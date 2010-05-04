@@ -1,0 +1,23 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public class GeneticAlgorithm {
+	
+	public GeneticAlgorithm() {
+		super();
+	}
+	
+	public GeneticAlgorithm(GeneticAlgorithmParams params, Selection select, Crossover cross) {
+		
+	}
+	
+	public GeneticAlgorithm(GeneticAlgorithmParams params, Selection select, Crossover cross, Symbiosis symb) {
+		
+	}
+}

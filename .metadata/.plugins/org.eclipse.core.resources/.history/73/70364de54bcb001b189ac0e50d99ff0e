@@ -1,0 +1,48 @@
+/**
+ * 
+ */
+package game;
+
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public class EntityManager {
+	
+	private LinkedList<Entity> ents = new LinkedList<Entity>();
+	
+	public EntityManager () {
+		
+	}
+	
+	public void update() {
+		for (Entity ent : ents) {
+			ent.update();
+		}
+	}
+	
+	/**
+	 * Check every entity against every other entity for a collision.
+	 * Where a Missile hits an Agent or similar only one will act on the collision.
+	 * Where two Agents collide each agent will deal with its own half of the collision.
+	 */
+	public void checkCollision() {
+		
+		/* O(n^2) this could be improved with using other data structures to hold the Agents
+		 * such as trees that are balanced by position, but this makes the process more complicated
+		 * than it needs to be for such a small number of ents. 
+		 */
+		for (Entity ent1 : ents) {
+			for (Entity ent2 : ents) {
+				//Don't collide with self
+				if (ent1 == ent2) continue;
+				if (ent1.getBounds().intersects(ent2.getBounds().getBounds2D())) {
+					ent1.collide(ent2);
+				}
+			}
+		}
+	}
+	
+}

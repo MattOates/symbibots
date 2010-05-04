@@ -1,0 +1,14 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public interface Symbiosis {
+
+	public LinkedList<Agent> symbiose(LinkedList<Agent> population); 
+	
+}

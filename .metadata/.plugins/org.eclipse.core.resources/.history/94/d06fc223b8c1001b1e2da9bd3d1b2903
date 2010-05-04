@@ -1,0 +1,22 @@
+/**
+ * 
+ */
+package game;
+
+/**
+ * @author matt
+ *
+ */
+public class World {
+	
+	private int energyspawn;
+	
+	private int width = 800;
+	private int height = 600;
+	
+	private EntityManager ents;
+	
+	public World() {
+		
+	}
+}

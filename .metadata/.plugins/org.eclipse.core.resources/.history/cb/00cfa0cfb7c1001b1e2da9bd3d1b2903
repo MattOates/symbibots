@@ -1,0 +1,31 @@
+/**
+ * 
+ */
+package game;
+
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+
+import vis.Visualisable;
+
+/**
+ * @author matt
+ *
+ */
+public abstract class Entity implements Visualisable {
+	
+	protected Shape bounds; 
+	
+	protected Point2D position;
+	
+	public Entity (World world) {
+		position = new Point2D();
+	}
+	
+	public void visualise (Graphics2D graphics) {
+		graphics.setClip(bounds);
+		//graphics.drawOval(arg0, arg1, arg2, arg3);
+	}
+	
+}

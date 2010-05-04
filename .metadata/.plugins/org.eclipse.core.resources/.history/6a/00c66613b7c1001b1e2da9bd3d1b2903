@@ -1,0 +1,121 @@
+/**
+ * 
+ */
+package game;
+
+import ga.Chromosome;
+import ga.GeneticAlgorithm;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D.Double;
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public class Agent extends Entity {
+	
+	private LinkedList<Chromosome> chromosomes = new LinkedList<Chromosome>();
+	
+	private int numOfSymbionts = 0;
+	
+	private int fitness = 0;
+	
+	private int numOfMissilesFired = 0;
+	private int numOfMissileHits = 0;
+	private int numOfTimesHealed = 0;
+	private int numOfEnergyCollected = 0;
+	
+	public Agent(World world) {
+		super(world);
+		bounds = new Rectangle2D.Double(position.getX()-15, position.getY()-15, 30.0, 30.0);
+		chromosomes.add(new Chromosome(this));
+	}
+	
+	public Agent(World world, Chromosome chromosome) {
+		super(world);
+		chromosomes.add(chromosome);
+	}
+	
+	public void visualise(Graphics2D graphics) {
+		super.visualise(graphics);
+		graphics.draw(bounds);
+	}
+	
+	public int calcFitness() {
+		return fitness++;
+	}
+	
+	public void addSymbiont(Agent agent) {
+		LinkedList<Chromosome> symbiont = agent.getChromosomes();
+		for (Chromosome temp : symbiont) {
+			chromosomes.add(temp);
+		}
+		numOfSymbionts++;
+	}
+	
+	public void doTick() {
+		for (Chromosome chromosome : chromosomes) chromosome.expressPhenotype();
+	}
+	
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuffer string = new StringBuffer();
+		for(Chromosome chromosome : chromosomes) {
+			string.append(chromosome.toString());
+			string.append("\n");
+		}
+		return string.toString();
+	}
+	
+	public int getNumOfGenes() {
+		return chromosomes.size() * GeneticAlgorithm.chromosomeSize;
+	}
+
+	/**
+	 * @return the chromosomes
+	 */
+	public LinkedList<Chromosome> getChromosomes() {
+		return chromosomes;
+	}
+
+	/**
+	 * @param chromosomes the chromosomes to set
+	 */
+	public void setChromosomes(LinkedList<Chromosome> chromosomes) {
+		this.chromosomes = chromosomes;
+	}
+
+	/**
+	 * @return the numofsymbionts
+	 */
+	public int getNumOfSymbionts() {
+		return numOfSymbionts;
+	}
+
+	/**
+	 * @param numOfSymbionts the number of symbionts to set
+	 */
+	public void setNumOfSymbionts(int numOfSymbionts) {
+		this.numOfSymbionts = numOfSymbionts;
+	}
+
+	/**
+	 * @return the fitness
+	 */
+	public int getFitness() {
+		return fitness;
+	}
+
+	/**
+	 * @param fitness the fitness to set
+	 */
+	public void setFitness(int fitness) {
+		this.fitness = fitness;
+	}
+	
+}

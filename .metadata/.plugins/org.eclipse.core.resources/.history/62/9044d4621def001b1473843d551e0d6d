@@ -1,0 +1,334 @@
+/**
+ * 
+ */
+package game;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+
+
+import ui.MainWindow;
+import vis.Visualisable;
+import ga.GeneticAlgorithm;
+
+/**
+ * @author  matt
+ */
+public class World implements Runnable, Visualisable {
+	
+	public static final boolean IS_TEST = false;
+	
+	public static final boolean IS_DATA_RUN = true;
+
+	private int energySpawn = 20;
+	
+	public static final int DEFAULT_WIDTH = 500;
+	private int width = DEFAULT_WIDTH;
+	public static final int DEFAULT_HEIGHT = 500;
+	private int height = DEFAULT_HEIGHT;
+	
+	private int ticks = 0;
+	private int tickTime = 200; //ms for a tick
+	private int expressTickInterval = 400;
+	private int epochs = 1;
+	private int endEpochInterval;
+	
+	private EntityManager entities;
+	private GeneticAlgorithm ga;
+	private transient MainWindow ui;
+	
+	private UserAgent player;
+	
+	private static final Color COLOR = new Color(72,167,255);
+	
+	public static final ImageIcon TITLE = new ImageIcon("images"+File.separator+"game_title.png");
+	
+	private boolean destroy = false;
+	
+	public World(){}
+	
+	public World(GeneticAlgorithm ga, MainWindow win) {
+		this.ga = ga;
+		this.ui = win;
+		endEpochInterval = ga.getEpochTime();
+		entities = new EntityManager(this);
+		this.ga.initPopulation(entities);
+		player = new UserAgent(entities);
+		for (int i=0; i < energySpawn;i++) new EnergyPacket(entities);
+		
+	}
+	
+	/**
+	 * Main world simulation loop, updates both the physics and the gene expression.
+	 * @see java.lang.Runnable#run()
+	 */
+	public void run() {
+		while (!destroy) {
+			PAUSED:if (! ui.isPaused()) {
+				
+				if (IS_DATA_RUN) {
+					if (epochs > GeneticAlgorithm.DATA_RUN_EPOCH_LIMIT) {
+						ui.setPaused(true);
+						ui.addLog("Data run completed...");
+						//Reset random number generator
+						GeneticAlgorithm.DATA_RUN_RANDOM.setSeed(19580427);
+						break PAUSED;
+					}
+				}
+				
+				if (player.getLife() <= 0) {
+					if (! IS_DATA_RUN)
+						JOptionPane.showMessageDialog(ui, "Your agent has died, skipping to next epoch.");
+				    ui.setSkipped(true);
+				}
+				
+				//Clean up any inactive entities and get them out of RAM
+				entities.unregisterInactive();
+				
+				//Update the GUI progress to reflect any change in the game
+				ui.updateEpochProgress(0, endEpochInterval, ticks);
+								
+				//If we have reached the end of an epoch start a new one.
+				if (ticks >= endEpochInterval || ui.isSkipped()) {
+					ui.setSkipped(false);
+					
+					synchronized(ui.getVispan()){
+						ga.newEpoch();
+					}
+					epochs++;
+					ticks = 0;
+					
+					//Add in energy and the player for this epoch
+					for (int i=0; i < energySpawn;i++) new EnergyPacket(entities);
+					entities.register(player);
+					//Reset the player to a new epoch
+					player.setLife(Agent.START_LIFE);
+				    player.setEnergy(Agent.START_ENERGY);
+				    ui.getSidepan().removeAllAgents();
+				}
+				
+				//Update the physics of the game and check for collisions and notify agents
+				entities.update();
+				ui.updateGraphics();
+				
+				entities.checkCollision();
+				
+				//Express the genome of the Agents
+				if ((ticks % expressTickInterval) == 0) {
+					ga.expressPopulation();
+					player.express();
+				}
+				try {
+					if (! IS_DATA_RUN) {
+						Thread.sleep(tickTime);
+					}
+				} catch (InterruptedException e) {
+					ui.addLog("Dropped a full tick in the simulation.");
+				}
+				ticks += tickTime;
+			}
+			else {
+				try {
+					Thread.sleep(100l);
+				} catch (InterruptedException e) {}
+			}
+		}
+		ui.addLog("Game world destroyed!");
+	}
+
+	/**
+	 * @return the ga
+	 */
+	public GeneticAlgorithm getGa() {
+		return ga;
+	}
+
+	/**
+	 * @param ga the ga to set
+	 */
+	public void setGa(GeneticAlgorithm ga) {
+		this.ga = ga;
+	}
+
+	/**
+	 * @param entities the entities to set
+	 */
+	public void setEntities(EntityManager entities) {
+		this.entities = entities;
+	}
+
+	/**
+	 * @return  the energySpawn
+	 */
+	public int getEnergySpawn() {
+		return energySpawn;
+	}
+
+	/**
+	 * @param energySpawn  the energySpawn to set
+	 */
+	public void setEnergySpawn(int energyspawn) {
+		this.energySpawn = energyspawn;
+	}
+
+	/**
+	 * @return  the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height  the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return  the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width  the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return
+	 */
+	public EntityManager getEntities() {
+		return entities;
+	}
+
+	/**
+	 * @param graphics
+	 */
+	public void visualise(Graphics graphics) {
+		graphics.setColor(COLOR);
+		graphics.fillRect(0, 0, getWidth(), getHeight());
+		graphics.drawImage(TITLE.getImage(),getWidth()/2 - TITLE.getIconWidth()/2, getHeight()/2 - TITLE.getIconHeight()/2,TITLE.getImageObserver());
+	}
+
+	/**
+	 * @return the endEpochInterval
+	 */
+	public int getEndEpochInterval() {
+		return endEpochInterval;
+	}
+
+	/**
+	 * @param endEpochInterval the endEpochInterval to set
+	 */
+	public void setEndEpochInterval(int endEpochInterval) {
+		this.endEpochInterval = endEpochInterval;
+	}
+
+	/**
+	 * @return the epochs
+	 */
+	public int getEpochs() {
+		return epochs;
+	}
+
+	/**
+	 * @param epochs the epochs to set
+	 */
+	public void setEpochs(int epochs) {
+		this.epochs = epochs;
+	}
+
+	/**
+	 * @return the expressTickInterval
+	 */
+	public int getExpressTickInterval() {
+		return expressTickInterval;
+	}
+
+	/**
+	 * @param expressTickInterval the expressTickInterval to set
+	 */
+	public void setExpressTickInterval(int expressTickInterval) {
+		this.expressTickInterval = expressTickInterval;
+	}
+
+	/**
+	 * @return the ticks
+	 */
+	public int getTicks() {
+		return ticks;
+	}
+
+	/**
+	 * @param ticks the ticks to set
+	 */
+	public void setTicks(int ticks) {
+		this.ticks = ticks;
+	}
+
+	/**
+	 * @return the tickTime
+	 */
+	public int getTickTime() {
+		return tickTime;
+	}
+
+	/**
+	 * @param tickTime the tickTime to set
+	 */
+	public void setTickTime(int tickTime) {
+		this.tickTime = tickTime;
+	}
+
+	/**
+	 * @return the ui
+	 */
+	public MainWindow getUi() {
+		return ui;
+	}
+
+	/**
+	 * @param ui the ui to set
+	 */
+	public void setUi(MainWindow ui) {
+		this.ui = ui;
+	}
+
+	/**
+	 * @return the player
+	 */
+	public UserAgent getPlayer() {
+		return player;
+	}
+
+	/**
+	 * @param player the player to set
+	 */
+	public void setPlayer(UserAgent player) {
+		this.player = player;
+	}
+
+	/**
+	 * @return the destroy
+	 */
+	public boolean isDestroy() {
+		return destroy;
+	}
+
+	/**
+	 * @param destroy the destroy to set
+	 */
+	public void setDestroy(boolean destroy) {
+		this.destroy = destroy;
+	}
+
+}

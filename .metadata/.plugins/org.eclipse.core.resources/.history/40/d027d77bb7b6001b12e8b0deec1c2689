@@ -1,0 +1,33 @@
+/**
+ * 
+ */
+package game;
+
+import ga.Gene;
+import sun.management.StringFlag;
+import ui.MainWindow;
+
+/**
+ * @author matt
+ *
+ */
+public class Main {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		/*MainWindow gui = new MainWindow("Symbibots v0.1");
+		gui.addContent();
+		gui.pack();
+		gui.setVisible(true);*/
+		Agent agent = new Agent();
+		System.out.println(agent);
+		agent.doTick();
+		System.out.println(agent);
+		agent.doTick();
+		System.out.println(agent);
+	}
+
+}

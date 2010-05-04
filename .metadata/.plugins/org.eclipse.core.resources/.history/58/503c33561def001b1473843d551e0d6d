@@ -1,0 +1,668 @@
+/**
+ * The main GUI container for the Symbibots game. 
+ */
+package ui;
+
+import ga.GeneticAlgorithm;
+import game.Agent;
+import game.UserAgent;
+import game.World;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+
+import vis.VisualisationPanel;
+
+/**
+ * @author  matt
+ */
+public class MainWindow extends JFrame implements ActionListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 382592117767573017L;
+	
+	private static final String VERSION = "0.8";
+	
+	/**
+	 * VisualisationPanel, panel rendering the game graphics.
+	 */
+	private VisualisationPanel vispan = new VisualisationPanel(this);
+	
+	/**
+	 * SidePanel, context sensitive panel for added human interaction.
+	 */
+	private SidePanel sidepan = new SidePanel(this);
+	
+	/**
+	 * GADialog, edit the operators and starting parameters of a GA.
+	 */
+	private GADialog dialog;
+	
+	/**
+	 * TextArea to dump logged strings from backend.
+	 */
+	private JTextArea log = new JTextArea(5, 50);
+	
+	/**
+	 * Allow the log to be pull off'able.
+	 */
+	private JToolBar logbar = new JToolBar("Symbibots - Log");
+	
+	/**
+	 * ScrollPane to allow resizing of the log.
+	 */
+	private JScrollPane logscroll = new JScrollPane(log);
+	
+	private JProgressBar epochprogress = new JProgressBar();
+	
+	private JToggleButton pause = new JToggleButton(new ImageIcon("images"+File.separator+"pause.png"));
+	
+	private JButton skip = new JButton(new ImageIcon("images"+File.separator+"skip.png"));
+	
+	private boolean ready = false;
+
+	public boolean paused = true;
+	
+	public boolean skipped = false;
+	
+	private int agentx = 0;
+	private int agenty = 0;
+	
+	private Thread gameloop;
+	
+	private World world;
+	
+	private JFileChooser filechooser = new JFileChooser();
+	
+	public MainWindow(String title) throws HeadlessException {
+		super(title);
+		setDefaultLookAndFeelDecorated(true);
+		setIconImage(new ImageIcon("images"+File.separator+"icon.png").getImage());
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addContent();
+		pack();
+		//setup size and location of frame
+		int screenwidth = 
+			(int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+		int screenheight = 
+			(int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+		setSize((3*screenwidth)/4,(3*screenheight)/4);
+		setLocation(screenwidth/8,screenheight/8);
+		
+		setVisible(true);
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		new MainWindow("Symbibots v"+VERSION);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getActionCommand() == "New") {
+			setupNewGame();
+		}
+		else if (e.getActionCommand() == "Open...") {
+			openGame();
+		}
+		else if (e.getActionCommand() == "Save...") {
+			saveGame();
+		}
+		else if (e.getActionCommand() == "Exit") {
+			System.exit(0);
+		}
+		else if (e.getActionCommand() == "Pause") {
+			JToggleButton source = (JToggleButton)e.getSource();
+			if (source.isSelected()) {
+				setPaused(true);
+			}
+			else {
+				setPaused(false);
+			}
+		}
+		else if (e.getActionCommand() == "Skip") {
+			setSkipped(true);
+		}
+		else if (e.getActionCommand() == "Edit GA") {
+			modifyGA();
+		}
+		/* View Stats stub
+		else if (e.getActionCommand() == "View Stats") {
+			if (world != null && world.getGa() != null)
+				JOptionPane.showMessageDialog(this,world.getGa().getStatistics().toString());
+			else  
+				JOptionPane.showMessageDialog(this, "No Genetic Algorithm available to view stats from.");
+		}*/
+		else if (e.getActionCommand() == "Save Stats") {
+			saveStats();
+		}
+		else if (e.getActionCommand() == "Data Run") {
+			saveStats();
+		}
+		else if (e.getActionCommand() == "About") {
+			JOptionPane.showMessageDialog(this,
+					 "Symbibots v"+VERSION
+					+"\nCreated by Matt Oates"
+					+"\nUniversity of Wales, Aberystwyth (2007)"
+					+"\n\nmattoates.co.uk\nmattoates@gmail.com"
+					,"About",JOptionPane.PLAIN_MESSAGE);
+		}		
+		else if (e.getActionCommand() == "View Agent") {
+			Agent agent = world.getEntities().getAgent(agentx,agenty);
+            if (agent != null && !(agent instanceof UserAgent)) {
+            	sidepan.addAgent(agent);
+            }
+		}
+		else if (e.getActionCommand() == "Acquire Genes") {
+			Agent agent = world.getEntities().getAgent(agentx,agenty);
+            if (agent != null) {
+            	world.getPlayer().addChromosome(agent.getChromosome());
+            	world.getPlayer().getPanel().updateTree();
+            }
+		}
+		else if (e.getActionCommand() == "popUpCancel") {
+			setPaused(false);
+		}
+	}
+	
+	public void addContent() {
+		getContentPane().setLayout(new BorderLayout());		
+		
+		//Setup the filechooser
+		filechooser.setFileFilter(new SymbibotsFileFilter());
+		
+		//Setup GA dialog.
+		dialog = new GADialog(this);
+		dialog.pack();
+		
+		//Stop the user editing the log. 
+		log.setEditable(false);
+		log.setLineWrap(false);
+		log.setBackground(new Color(0,0,0));
+		log.setForeground(new Color(0,255,0));
+		
+		//Setup the logbar
+		logbar.setLayout(new BorderLayout());
+		
+		epochprogress.setStringPainted(true);
+		epochprogress.setToolTipText("Current game epoch progress.");
+		
+		pause.addActionListener(this);
+		pause.setActionCommand("Pause");
+		pause.setSelected(paused);
+		
+		skip.addActionListener(this);
+		skip.setActionCommand("Skip");
+		
+		logbar.add(epochprogress, BorderLayout.NORTH);
+		JPanel temp = new JPanel(new GridLayout(2,1));
+		temp.add(pause);
+		temp.add(skip);
+		logbar.add(temp, BorderLayout.WEST);
+		logbar.add(logscroll, BorderLayout.CENTER);
+		
+		getContentPane().add(sidepan, BorderLayout.WEST);
+		getContentPane().add(vispan, BorderLayout.CENTER);
+		getContentPane().add(logbar, BorderLayout.SOUTH);
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenuItem item;
+	    JMenu menu;
+	    
+	    // Create File menu
+	    menu= new JMenu("File");
+	    menu.setMnemonic('F');
+	    	item = new JMenuItem("New");
+	    		item.setMnemonic('N');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images"+File.separator+"filenew.png"));
+    			menu.add(item);
+	    	item = new JMenuItem("Open...");
+	    		item.setMnemonic('O');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images"+File.separator+"fileopen.png"));
+	    		menu.add(item);
+	    	item = new JMenuItem("Save...");
+	    		item.setMnemonic('S');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images"+File.separator+"filesaveas.png"));
+	    		menu.add(item);
+	    	item = new JMenuItem("Exit");
+	    		item.setMnemonic('x');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images"+File.separator+"exit.png"));
+	    		menu.add(item);
+	    
+	    //Add File menu to the bar
+	    menuBar.add(menu);
+	    
+	    //Create Tools menu
+	    menu= new JMenu("Tools");
+	    menu.setMnemonic('T');
+		    item = new JMenuItem("Edit GA");
+				item.setMnemonic('E');
+				item.addActionListener(this);
+				item.setIcon(new ImageIcon("images"+File.separator+"wizard.png"));
+				menu.add(item);
+			/*View Stats stub
+			item = new JMenuItem("View Stats");
+	    		item.setMnemonic('V');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images"+File.separator+"stats.png"));
+    			menu.add(item);*/
+	    	item = new JMenuItem("Save Stats");
+	    		item.setMnemonic('S');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images"+File.separator+"stats.png"));
+    			menu.add(item);
+    		item = new JRadioButtonMenuItem("Data Run");
+    			item.setSelected(false);
+    			item.setMnemonic('D');
+    			item.addActionListener(this);
+    			menu.add(item);
+    	
+    	//Add Tools menu to the bar
+	    menuBar.add(menu);
+	    
+	    //Create Edit menu
+	    menu= new JMenu("Help");
+	    menu.setMnemonic('H');
+	    	item = new JMenuItem("About");
+	    		item.setMnemonic('A');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images"+File.separator+"wizard.png"));
+    			menu.add(item);
+    	
+    	//Add Edit menu to the bar
+	    menuBar.add(menu);
+	    
+	    //Install the menu bar in the frame
+	    setJMenuBar(menuBar);
+	    
+	    
+	    //Create Agent context popupmenu
+	    final JPopupMenu agentmenu = new JPopupMenu();
+	    agentmenu.setBorderPainted(true);
+	    item = new JMenuItem("View Agent");
+	    item.addActionListener(this);
+	    item.setToolTipText("View a game agents geneome in the side bar.");
+	    agentmenu.add(item);
+	    item = new JMenuItem("Acquire Genes");
+	    item.addActionListener(this);
+	    item.setToolTipText("Add an agents genome to your agent.");
+	    agentmenu.add(item);
+	    agentmenu.add(new JSeparator());
+	    item = new JMenuItem("Cancel");
+	    item.setActionCommand("popUpCancel");
+	    item.addActionListener(this);
+	    agentmenu.add(item);
+	    
+	    // Set the component to show the popup menu
+	    vispan.addMouseListener(new MouseAdapter() {
+	        public void mousePressed(MouseEvent evt) {
+	        	if (evt.isPopupTrigger()) {
+	        		setPaused(true);
+	            	agentx = evt.getX();
+	            	agenty = evt.getY();
+	            	Agent agent = world.getEntities().getAgent(agentx,agenty);
+	            	if (agent != null && !(agent instanceof UserAgent))
+	            		agentmenu.show(evt.getComponent(), agentx, agenty);
+	            }
+	        }
+	        public void mouseReleased(MouseEvent evt) {
+	            if (evt.isPopupTrigger()) {
+	            }
+	        }
+	    });
+	    
+		addLog("Welcome to Symbibots! Use the File menu to start a new simulation or open a previously saved one.");
+	}
+	
+	public void updateGraphics() {
+		vispan.repaint(0);
+	}
+	
+	/**
+	 * Close the currently running World, and allow the gameloop to return cleanly
+	 *
+	 */
+	private void closeOldGame() {
+		world.setDestroy(true);
+		world = null;
+		vispan.setWorld(null);
+		vispan.repaint();
+		getContentPane().remove(sidepan);
+		sidepan = new SidePanel(this);
+		getContentPane().add(sidepan, BorderLayout.WEST);
+	}
+	
+	/**
+	 * Setup a new game GUI callback.
+	 *
+	 */
+	private void setupNewGame() {
+		if (gameloop != null) {
+			closeOldGame();
+		}
+		dialog.setVisible(true);
+		if (dialog.isAccepted()) {
+			GeneticAlgorithm ga = new GeneticAlgorithm();
+			dialog.setGA(ga);
+			world = new World(ga,this);
+			sidepan.addPlayer(world.getPlayer());
+			this.addKeyListener(world.getPlayer());
+			vispan.setWorld(world);
+			//Relic of rendering loop
+			//graphicsloop = new Thread(vispan);
+			gameloop = new Thread(world);
+			//graphicsloop.start();
+			gameloop.start();
+			addLog("New game created, don't forget to un-pause to start playing.");
+			vispan.repaint();
+		}
+		else {
+			addLog("New game cancelled.");
+		}
+	}
+	
+	/**
+	 * Open a game GUI callback.
+	 *
+	 */
+	private void openGame() {
+		OPEN: if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			if (!filechooser.getSelectedFile().canRead()) {
+				addErrorLog("Open game FAILED, file not readable.");
+				break OPEN;
+			}
+			if (!filechooser.getSelectedFile().isFile()) {
+				addErrorLog("Open game FAILED, not a file.");
+				break OPEN;
+			}
+			
+			XMLDecoder decoder;
+			try {
+				decoder = new XMLDecoder(
+				    new BufferedInputStream(
+				        new FileInputStream(filechooser.getSelectedFile())));
+			} catch (FileNotFoundException e) {
+				addErrorLog("Open game FAILED, file not found.");
+				break OPEN;
+			}
+			World opened = (World)decoder.readObject();
+			decoder.close();
+			
+			if (gameloop != null) {
+				closeOldGame();
+			}
+			
+			world = opened;
+			world.setUi(this);
+			sidepan.addPlayer(world.getPlayer());
+			this.addKeyListener(world.getPlayer());
+			vispan.setWorld(world);
+			gameloop = new Thread(world);
+			gameloop.start();
+			addLog("Opened a game, don't forget to un-pause to start playing.");
+		}
+		else {
+			addLog("Open game cancelled.");
+		}
+	}
+	
+	/**
+	 * Save a game GUI callback.
+	 *
+	 */
+	private void saveGame() {
+		//If there is no world or GA don't try and save
+		if (world == null || world.getGa() == null) {
+			JOptionPane.showMessageDialog(this, "No Symbibots game-world available to save."
+											   ,"Error",JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		SAVE: if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File file = filechooser.getSelectedFile();
+			if (!file.getName().endsWith(".sym")) {
+				try {
+					file = new File(file.getCanonicalPath()+".sym");
+				} catch (IOException e) {
+					addErrorLog("Save game FAILED, "+e.getLocalizedMessage());
+					break SAVE;
+				}
+			}
+			
+			if (file.exists()) {
+				file.delete();
+			}
+			
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				addErrorLog("Save game FAILED, "+e.getLocalizedMessage());
+				break SAVE;
+			}
+			
+			if (!file.canRead()) {
+				addErrorLog("Save game FAILED, file not readable.");
+				break SAVE;
+			}
+			if (!file.isFile()) {
+				addErrorLog("Open game FAILED, not a file.");
+				break SAVE;
+			}
+			
+			XMLEncoder encoder;
+			try {
+				encoder = new XMLEncoder(
+				    new BufferedOutputStream(
+				        new FileOutputStream(file)));
+			} catch (FileNotFoundException e) {
+				addErrorLog("Save game FAILED, file not found.");
+				break SAVE;
+			}
+			encoder.writeObject(world);
+			encoder.close();
+			
+			addLog("Saved the game, don't forget to un-pause to start playing.");
+		}
+		else {
+			addLog("Save game cancelled.");
+		}
+	}
+	
+	/**
+	 * Modify the current games Genetic Algorithm
+	 */
+	private void modifyGA() {
+		//If there is no world or GA don't try and save
+		if (world == null) {
+			JOptionPane.showMessageDialog(this, "No Genetic Algorithm available to edit.");
+			return;
+		}
+		dialog.setVisible(true);
+		if (dialog.isAccepted()) {
+			dialog.setGA(world.getGa());
+			addLog("Updated Genetic Algorithm for the currently running game.");
+		}
+		else {
+			addLog("Genetic Algorithm was not modified.");
+		}
+	}
+	
+	private void saveStats() {
+		//If there is no world or GA don't try and save
+		if (world == null || world.getGa() == null) {
+			JOptionPane.showMessageDialog(this, "No Genetic Algorithm available to save stats from.");
+			return;
+		}
+		SAVE:if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File file = filechooser.getSelectedFile();
+			if (!file.getName().endsWith(".csv")) {
+				try {
+					file = new File(file.getCanonicalPath()+".csv");
+				} catch (IOException ex) {
+					addErrorLog("Save stats FAILED, "+ex.getLocalizedMessage());
+					break SAVE;
+				}
+			}
+			
+			//Remove a previously saved file
+			if (file.exists())file.delete();
+			
+			//Create a new file
+			try {
+				file.createNewFile();
+			} catch (IOException ex) {
+				addErrorLog("Save stats FAILED, "+ex.getLocalizedMessage());
+				break SAVE;
+			}
+			
+			if (file.canWrite()) {
+				try {
+					PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(file)));
+					out.print(world.getGa().getStatistics());
+					out.close();
+				} catch (FileNotFoundException ex) {
+					addErrorLog("Save game FAILED, file not found.");
+					break SAVE;
+				}
+				
+			}
+			else {
+				addErrorLog("Save stats FAILED, not able to write to file.");
+			}
+		}
+	}
+	
+	/**
+	 * Add a message to the log box on screen.
+	 * @param string
+	 */
+	public synchronized void addLog(String string) {
+		log.append(string+"\n");
+	}
+	
+	/**
+	 * Add an error message to the log box on screen.
+	 * @param string
+	 */
+	public synchronized void addErrorLog(String string) {
+		log.append(string+"\n");
+		JOptionPane.showMessageDialog(this, "An error has occurred, see the logbar for details."
+				   ,"Error",JOptionPane.ERROR_MESSAGE);
+	}
+
+	public void updateEpochProgress(int start, int finish, int current) {
+		epochprogress.setMinimum(start);
+		epochprogress.setMaximum(finish);
+		epochprogress.setValue(current);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isReadyForGame() {
+		return ready;
+	}
+
+	/**
+	 * @return the paused
+	 */
+	public boolean isPaused() {
+		return paused;
+	}
+
+	/**
+	 * @param paused the paused to set
+	 */
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+		pause.setSelected(this.paused);
+	}
+
+	/**
+	 * @return the vispan
+	 */
+	public VisualisationPanel getVispan() {
+		return vispan;
+	}
+
+	/**
+	 * @param vispan the vispan to set
+	 */
+	public void setVispan(VisualisationPanel vispan) {
+		this.vispan = vispan;
+	}
+
+	/**
+	 * @return the skipped
+	 */
+	public boolean isSkipped() {
+		return skipped;
+	}
+
+	/**
+	 * @param skipped the skipped to set
+	 */
+	public void setSkipped(boolean skipped) {
+		this.skipped = skipped;
+	}
+	
+	class SymbibotsFileFilter extends FileFilter {
+	    
+		/* (non-Javadoc)
+		 * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
+		 */
+		@Override
+		public boolean accept(File file) {
+			if (file.isDirectory()) {
+				return true;
+			}
+			return file.getName().endsWith(".sym");
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.filechooser.FileFilter#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return "All Symbibots Files";
+		}
+	}
+
+	/**
+	 * @return the sidepan
+	 */
+	public SidePanel getSidepan() {
+		return sidepan;
+	}
+
+	/**
+	 * @param sidepan the sidepan to set
+	 */
+	public void setSidepan(SidePanel sidepan) {
+		this.sidepan = sidepan;
+	}
+
+}

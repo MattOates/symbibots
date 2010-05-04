@@ -1,0 +1,69 @@
+/**
+ * 
+ */
+package game;
+
+/**
+ * @author  matt
+ */
+public class World {
+	
+	private int energyspawn;
+	
+	private int width = 800;
+	private int height = 600;
+	
+	private EntityManager ents;
+	
+	public World() {
+		
+	}
+
+	/**
+	 * @return  the energyspawn
+	 * @uml.property  name="energyspawn"
+	 */
+	public int getEnergyspawn() {
+		return energyspawn;
+	}
+
+	/**
+	 * @param energyspawn  the energyspawn to set
+	 * @uml.property  name="energyspawn"
+	 */
+	public void setEnergyspawn(int energyspawn) {
+		this.energyspawn = energyspawn;
+	}
+
+	/**
+	 * @return  the height
+	 * @uml.property  name="height"
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height  the height to set
+	 * @uml.property  name="height"
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return  the width
+	 * @uml.property  name="width"
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width  the width to set
+	 * @uml.property  name="width"
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+}

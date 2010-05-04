@@ -1,0 +1,175 @@
+/**
+ * 
+ */
+package ga;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+
+/**
+ * @author matt
+ *
+ */
+public class GeneticAlgorithmFactory {
+	
+	public static ArrayList<Selection> getSelectionList() {
+		Selection select = null;
+		ArrayList<Selection> list = new ArrayList<Selection>();
+		File selectionpkg = new File("ga/selection");
+		//Get a list of all the GeneClasses available in the Genes package.
+		String[] selects = selectionpkg.list(new SelectionFilter());
+		
+		for ( String selectname : selects ) {
+			selectname = selectname.replaceAll("\\.java", "");
+			
+						
+			try {
+				select = (Selection) Class.forName("ga.selection." + selectname, true, Thread.currentThread().getContextClassLoader()).newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			list.add(select);
+		}
+		return list;
+	}
+	
+	public static ArrayList<Crossover> getCrossoverList() {
+		Crossover cross = null;
+		ArrayList<Crossover> list = new ArrayList<Crossover>();
+		File crossoverpkg = new File("ga/crossover");
+		//Get a list of all the GeneClasses available in the Genes package.
+		String[] crosses = crossoverpkg.list(new CrossoverFilter());
+		
+		for ( String crossname : crosses ) {
+			crossname = crossname.replaceAll("\\.java", "");
+			
+						
+			try {
+				cross = (Crossover) Class.forName("ga.crossover." + crossname, true, Thread.currentThread().getContextClassLoader()).newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			list.add(cross);
+		}
+		return list;
+	}
+	
+	public static ArrayList<Symbiosis> getSymbiosisList() {
+		Symbiosis symb = null;
+		ArrayList<Symbiosis> list = new ArrayList<Symbiosis>();
+		File symbiosispkg = new File("ga/symbiosis");
+		//Get a list of all the GeneClasses available in the Genes package.
+		String[] symbs = symbiosispkg.list(new SymbiosisFilter());
+		
+		for ( String symbname : symbs ) {
+			symbname = symbname.replaceAll("\\.java", "");
+			
+						
+			try {
+				symb = (Symbiosis) Class.forName("ga.crossover." + symbname, true, Thread.currentThread().getContextClassLoader()).newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			list.add(symb);
+		}
+		return list;
+	}
+	
+	public static Selection getSelection(String name) {
+		Selection select = null;
+		
+		try {
+			select = (Selection) Class.forName("ga.selection." + name, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return select;		
+	}
+	
+	public static Crossover getCrossover(String name) {
+		Crossover cross = null;
+		
+		try {
+			cross = (Crossover) Class.forName("ga.crossover." + name, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return cross;		
+	}
+	
+	public static Symbiosis getSymbiosis(String name) {
+		Symbiosis symb = null;
+		
+		try {
+			symb = (Symbiosis) Class.forName("ga.symbiosis." + name, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return symb;		
+	}
+	
+}
+
+class SelectionFilter implements FilenameFilter {
+    public boolean accept(File dir, String name) {
+        return (name.endsWith("Selection.java"));
+    }
+}
+
+class CrossoverFilter implements FilenameFilter {
+    public boolean accept(File dir, String name) {
+        return (name.endsWith("Crossover.java"));
+    }
+}
+
+class SymbiosisFilter implements FilenameFilter {
+    public boolean accept(File dir, String name) {
+        return (name.endsWith("Symbiosis.java"));
+    }
+}

@@ -1,0 +1,18 @@
+/**
+ * 
+ */
+package ga;
+
+import game.Agent;
+
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public interface Selection {
+	
+	public Agent[] select(LinkedList<Agent> population);
+
+}

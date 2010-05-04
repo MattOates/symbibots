@@ -1,0 +1,152 @@
+/**
+ * 
+ */
+package game;
+
+import ga.Chromosome;
+import ga.Gene;
+import ga.GeneticAlgorithm;
+import ga.genes.VoidGene;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public class Agent extends Entity {
+	
+	private LinkedList<Chromosome> chromosomes = new LinkedList<Chromosome>();
+	
+	private int numOfSymbionts = 0;
+	
+	private int fitness = 0;
+	
+	private int numOfMissilesFired = 0;
+	private int numOfMissileHits = 0;
+	private int numOfTimesHealed = 0;
+	private int numOfEnergyCollected = 0;
+	
+	public Agent(World world) {
+		super(world);
+		bounds = new Rectangle2D.Double(position.getX()-15, position.getY()-15, 30.0, 30.0);
+		chromosomes.add(new Chromosome(this));
+	}
+	
+	public Agent(World world, Chromosome chromosome) {
+		super(world);
+		chromosomes.add(chromosome);
+	}
+	
+	public void visualise(Graphics2D graphics) {
+		super.visualise(graphics);
+		graphics.draw(bounds);
+	}
+	
+	public int calcFitness() {
+		//STUB need to change this to a proper fitness function at some point
+		int numOfVoid = 0;
+		for (Gene gene : getChromosome().getGenes()) {
+			if (gene instanceof VoidGene) numOfVoid++;
+		}
+		setFitness(numOfVoid);
+		return numOfVoid;
+	}
+	
+	public void addSymbiont(Agent agent) {
+		LinkedList<Chromosome> symbiont = agent.getChromosomes();
+		for (Chromosome temp : symbiont) {
+			chromosomes.add(temp);
+		}
+		numOfSymbionts++;
+	}
+	
+	public void doTick() {
+		for (Chromosome chromosome : chromosomes) chromosome.express();
+	}
+	
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuffer string = new StringBuffer();
+		for(Chromosome chromosome : chromosomes) {
+			string.append(chromosome.toString());
+			string.append("\n");
+		}
+		return string.toString();
+	}
+	
+	public int getNumOfGenes() {
+		return chromosomes.size() * GeneticAlgorithm.chromosomeSize;
+	}
+	
+	/**
+	 * Get the sexual chromosome for this agent.
+	 * @return the sexual Chromosome for this agent.
+	 */
+	public Chromosome getChromosome() {
+		return chromosomes.getFirst();
+	}
+	
+	/**
+	 * Get a linked list of all the symbiotic chromosomes for this Agent
+	 * @return the chromosomes
+	 */
+	@SuppressWarnings("unchecked")
+	public LinkedList<Chromosome> getSymbioticChromosomes() {
+		return (LinkedList) chromosomes.subList(1, chromosomes.size() -1);
+		/*if (chromosomes.size() > 1) return null;
+		LinkedList<Chromosome> symbionts = (LinkedList<Chromosome>) chromosomes.clone();
+		symbionts.removeFirst();
+		return symbionts;*/
+	}
+	
+	/**
+	 * @return the chromosomes
+	 */
+	public LinkedList<Chromosome> getChromosomes() {
+		return chromosomes;
+	}
+
+	/**
+	 * @param chromosomes the chromosomes to set
+	 */
+	public void setChromosomes(LinkedList<Chromosome> chromosomes) {
+		this.chromosomes = chromosomes;
+	}
+
+	/**
+	 * @return the numofsymbionts
+	 */
+	public int getNumOfSymbionts() {
+		return numOfSymbionts;
+	}
+
+	/**
+	 * @param numOfSymbionts the number of symbionts to set
+	 */
+	public void setNumOfSymbionts(int numOfSymbionts) {
+		this.numOfSymbionts = numOfSymbionts;
+	}
+
+	/**
+	 * @return the fitness
+	 */
+	public int getFitness() {
+		return fitness;
+	}
+
+	/**
+	 * @param fitness the fitness to set
+	 */
+	public void setFitness(int fitness) {
+		this.fitness = fitness;
+	}
+	
+}

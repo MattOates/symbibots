@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package ga.genes;
+
+import ga.Gene;
+import game.Agent;
+
+/**
+ * @author matt
+ *
+ */
+public class VoidGene extends Gene {
+	
+	@Override
+	public void express(Agent agent, Gene next) {
+		// TODO Auto-generated method stub
+		System.out.println("Expressing ".toString());
+	}
+	
+	@Override
+	public String toInfoString() {
+		return "Does nothing.";
+	}
+	
+}

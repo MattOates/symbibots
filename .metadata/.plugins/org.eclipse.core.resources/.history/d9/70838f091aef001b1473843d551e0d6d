@@ -1,0 +1,65 @@
+/**
+ * 
+ */
+package ga.selection;
+
+import java.util.LinkedList;
+
+import ga.GeneticAlgorithm;
+import ga.Selection;
+import game.Agent;
+
+/**
+ * @author matt
+ *
+ */
+public class TournamentSelection implements Selection {
+	
+	public TournamentSelection(){}
+	
+	/**
+	 * Tour size used in selection
+	 */
+	public static int tourSize = (int)(GeneticAlgorithm.populationSize /4);
+	
+	/* (non-Javadoc)
+	 * @see ga.Selection#select(ga.GeneticAlgorithm)
+	 */
+	public LinkedList<Agent> select(GeneticAlgorithm ga) {
+		LinkedList<Agent> population = ga.getPopulation();
+		LinkedList<Agent> selected = new LinkedList<Agent>();
+		LinkedList<Agent> tour = new LinkedList<Agent>();
+				
+		while (selected.size() < GeneticAlgorithm.populationSize /2) {
+			
+			//Get a Tour of size tourSize from a random sample of the population
+			for (int i=0; i < tourSize; i++) {
+				int index = (int)Math.round(GeneticAlgorithm.getRandNum() * (population.size()-1));
+				tour.add(population.get(index));
+			}
+			
+			Agent winner = tour.getFirst();
+			
+			//Carry out a tournament on the tour
+			for (Agent candidate : tour) {
+				if (candidate.getFitness() > winner.getFitness()) {
+					winner = candidate;
+				}
+			}
+			
+			selected.add(winner);
+			tour.clear();
+			
+		}
+		
+		return selected;
+	}
+
+	/* (non-Javadoc)
+	 * @see ga.Selection#toInfoString()
+	 */
+	public String toInfoString() {
+		return "A Tour a quarter of the size of the population is chosen randomly. The best individual from this group is selected by a tournament comparisson and goes on to reproduce in the next generation. The selected group is half the size of main population.";
+	}
+
+}

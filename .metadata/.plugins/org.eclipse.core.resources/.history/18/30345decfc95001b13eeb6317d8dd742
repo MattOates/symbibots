@@ -1,0 +1,92 @@
+/**
+ * 
+ */
+package ga;
+
+import java.io.File;
+import java.io.FilenameFilter;
+
+/**
+ * @author matt
+ *
+ */
+public class GeneticAlgorithmFactory {
+	
+	public static Gene getGene(String name) {
+		Gene gene = null;
+		
+		try {
+			gene = (Gene) Class.forName("ga.genes." + name, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return gene;		
+	}
+	
+	public static Gene getGene(String name, byte allele) {
+		Gene gene = null;
+		
+		try {
+			gene = (Gene) Class.forName("ga.genes." + name, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		gene.setAllele(allele);
+		gene.setExpression(allele);
+		return gene;		
+	}
+	
+	public static Gene getRandomGene() {
+		Gene gene = null;
+		String genename = "";
+		File genespkg = new File("ga/genes");
+
+		//Get a list of all the GeneClasses available in the Genes package.
+		String[] genes = genespkg.list(new GeneFilter());
+		
+		//Get a random GeneClass name from that list.
+		//double rand = Math.random();
+		//System.out.println(rand);
+		int index = (int) Math.round((genes.length - 1) * Math.random());
+		//System.out.println(index);
+		System.out.println("Number of genes found: " + genes.length);
+		genename = genes[index].replaceAll("\\.java", "");
+		System.out.println("Getting an instance of " + genename);
+		
+		try {
+			gene = (Gene) Class.forName("ga.genes." + genename, true, Thread.currentThread().getContextClassLoader()).newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return gene;
+	}	
+}
+
+class GeneFilter implements FilenameFilter {
+    public boolean accept(File dir, String name) {
+        return (name.endsWith("Gene.java"));
+    }
+}

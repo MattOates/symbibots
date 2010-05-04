@@ -1,0 +1,6 @@
+#Sun Dec 24 12:37:17 GMT 2006
+__DEFAULT__=false
+org.eclipse.sdk.Eclipse.master=true
+org.eclipse.sdk.Google.master=true
+org.eclipse.help.ui.localSearch.master=true
+expression=show line numbers

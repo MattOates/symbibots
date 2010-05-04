@@ -1,0 +1,263 @@
+/**
+ * 
+ */
+package ui;
+
+import ga.Crossover;
+import ga.GeneticAlgorithm;
+import ga.GeneticAlgorithmFactory;
+import ga.Selection;
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Hashtable;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+/**
+ * @author matt
+ *
+ */
+public class GADialog extends JDialog implements ActionListener, ChangeListener {
+	
+	private JPanel wizard = new JPanel();
+	
+	private JPanel form;
+	
+	private Hashtable<String, Selection> selects  = GeneticAlgorithmFactory.getSelectionHash();
+	private JComboBox selection = new JComboBox(selects.keySet().toArray());
+	private JTextArea selectinfo = new JTextArea( 
+			selects.get(selection.getSelectedItem()).toInfoString()
+			,3,30);
+	
+	private	Hashtable<String, Crossover> crosses  = GeneticAlgorithmFactory.getCrossoverHash();
+	private JComboBox crossover = new JComboBox(crosses.keySet().toArray());
+	private JTextArea crossinfo = new JTextArea(
+			crosses.get(crossover.getSelectedItem()).toInfoString()
+			,3,30);
+	
+	private JSpinner crossoverProbability = new JSpinner(new SpinnerNumberModel(0.8, 0.0, 1.0, 0.05)); 
+	private JSpinner geneMutationProbability = new JSpinner(new SpinnerNumberModel(0.1, 0.0, 1.0, 0.05));
+	private JSpinner alleleMutationProbability = new JSpinner(new SpinnerNumberModel(0.5, 0.0, 1.0, 0.05));
+	private JSpinner symbioticProbability = new JSpinner(new SpinnerNumberModel(0.4, 0.0, 1.0, 0.05));
+	
+	public GADialog(Frame frame) {
+		super (frame, true);
+		this.setLayout(new BorderLayout());
+		this.add(new ImagePanel("images/gaw_title.png", false, false), BorderLayout.NORTH);
+		this.add(new ImagePanel("images/gaw_side_bar.png", false, false), BorderLayout.WEST);
+		wizard.setLayout(new CardLayout());
+		this.add(wizard, BorderLayout.CENTER);
+		
+		//Setup wizard controls
+		JButton next = new JButton("Next");
+		next.setIcon(new ImageIcon("images/next.png"));
+		next.addActionListener(this);
+		
+		JButton back = new JButton("Back");
+		back.setIcon(new ImageIcon("images/back.png"));
+		back.addActionListener(this);
+		
+		JButton accept = new JButton("Accept");
+		accept.setIcon(new ImageIcon("images/accept.png"));
+		accept.addActionListener(this);
+		
+		//Setup first page of the wizard, setting GA operators
+		form = new JPanel();
+		form.setLayout(new GridBagLayout());
+		
+		GridBagConstraints c = new GridBagConstraints();
+		selection.addActionListener(this);
+		selection.setActionCommand("Selection");
+		//Set default selection
+		selection.setSelectedItem("RouletteSelection");
+		crossover.addActionListener(this);
+		crossover.setActionCommand("Crossover");
+		//Set default selection
+		crossover.setSelectedItem("SinglePointCrossover");
+		
+		/*JLabel title = new JLabel("Create GA");
+		title.setFont(new Font("Times New Roman", Font.BOLD, 20) );
+		
+		this.add(title, BorderLayout.NORTH);*/
+		JTextArea intro = new JTextArea("Symbibots uses a Genetic Algorithm to create waves of enemies for you to fight. If you know about Genetic Algorithms or want to fiddle with the workings of the game this is your chance! Otherwise the defaults should work just fine, click 'Ok' and you are set to go.");
+		intro.setEditable(false);
+        intro.setLineWrap(true);
+        intro.setWrapStyleWord(true);
+        intro.setPreferredSize(new Dimension(600,75));
+		
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 3;
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.PAGE_START;
+        form.add(intro, c);
+        
+        c.gridwidth = 1;
+        
+        c.gridx = 0;
+        c.gridy = 1;
+        c.insets = new Insets(5,5,5,5);
+        c.anchor = GridBagConstraints.LINE_START;
+		form.add(new JLabel("Selection:"),c);
+		c.gridx = 1;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.CENTER;
+		form.add(selection, c);
+		c.gridx = 2;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.LINE_END;
+        selectinfo.setEditable(false);
+        selectinfo.setLineWrap(true);
+        selectinfo.setWrapStyleWord(true);
+		form.add(selectinfo, c);
+		
+		c.gridx = 0;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.LINE_START;
+		form.add(new JLabel("Crossover:"), c);
+		c.gridx = 1;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.CENTER;
+		form.add(crossover, c);
+        crossinfo.setEditable(false);
+        crossinfo.setLineWrap(true);
+        crossinfo.setWrapStyleWord(true);
+        c.gridx = 2;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.LINE_END;
+		form.add(crossinfo, c);
+		
+		c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 3;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        JSeparator sep = new JSeparator();
+		form.add(sep, c);
+		
+        c.gridx = 2;
+        c.gridy = 4;
+        c.gridwidth = 1;
+        c.fill = GridBagConstraints.NONE;
+        c.ipadx = 50;
+        c.anchor = GridBagConstraints.LAST_LINE_END;
+		form.add(next, c);
+		
+		wizard.add("Operators", form);
+		
+		//Setup second page of the wizard, setting GA parameters
+		form = new JPanel();
+		form.setLayout(new GridBagLayout());
+		
+		c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 1;
+        c.insets = new Insets(5,5,5,5);
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        form.add(new JLabel("Crossover Probability:"), c);
+        c.gridx = 1;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.PAGE_START;
+        form.add(crossoverProbability, c);
+		
+        c.gridx = 0;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.LINE_START;
+        form.add(new JLabel("Phenotype Mutation Probability:"), c);
+        c.gridx = 1;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.CENTER;
+        form.add(geneMutationProbability, c);
+        
+        c.gridx = 0;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.LINE_START;
+        form.add(new JLabel("Allele Expression Mutation Probability:"), c);
+        c.gridx = 1;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.CENTER;
+        form.add(alleleMutationProbability,c);
+        
+        c.gridx = 0;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.LINE_START;
+        form.add(new JLabel("Symbiogenesis Probability:"), c);
+        c.gridx = 1;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.CENTER;
+		form.add(symbioticProbability, c);
+		
+		c.gridx = 1;
+        c.gridy = 4;
+        c.ipadx = 50;
+        c.anchor = GridBagConstraints.LAST_LINE_END;
+		form.add(back, c);
+		c.gridx = 2;
+        c.gridy = 4;
+        c.ipadx = 50;
+        c.anchor = GridBagConstraints.LAST_LINE_END;
+		form.add(accept, c);
+		
+		wizard.add("Parameters", form);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand() == "Selection") {
+			selectinfo.setText( selects.get(selection.getSelectedItem()).toInfoString());
+		}
+		else if(e.getActionCommand() == "Crossover") {
+			crossinfo.setText( crosses.get(crossover.getSelectedItem()).toInfoString());
+		}
+		else if (e.getActionCommand() == "Next") {
+			CardLayout cards = (CardLayout)wizard.getLayout();
+			cards.next(wizard);
+		}
+		else if (e.getActionCommand() == "Back") {
+			CardLayout cards = (CardLayout)wizard.getLayout();
+			cards.previous(wizard);
+		}
+		else if (e.getActionCommand() == "Accept") {
+			this.setVisible(false);
+		}
+	}
+	
+	public void stateChanged(ChangeEvent e) {
+		
+	}
+
+	/**
+	 * @return
+	 */
+	public GeneticAlgorithm getGA() {
+		Selection select = selects.get(selection.getSelectedItem());
+		Crossover cross = crosses.get(crossover.getSelectedItem());
+		GeneticAlgorithm ga = new GeneticAlgorithm(select, cross);
+		System.out.println(crossoverProbability.getValue().getClass().getSimpleName());
+			ga.setCrossoverProbability(Double.parseDouble((String)crossoverProbability.getValue()));
+			ga.setGeneMutationProbability(Double.parseDouble((String)geneMutationProbability.getValue()));
+			ga.setAlleleMutationProbability(Double.parseDouble((String)alleleMutationProbability.getValue()));
+			ga.setSymbioticProbability(Double.parseDouble((String)symbioticProbability.getValue()));
+		System.out.println(ga);
+		return ga;
+	}	
+}

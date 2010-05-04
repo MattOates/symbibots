@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="RefactoringWizard.preview">
+		<item key="width" value="1024"/>
+		<item key="height" value="618"/>
+	</section>
+	<section name="org.eclipse.ltk.ui.refactoring.settings">
+		<item key="updateSimilarElementsMatchStrategy" value="1"/>
+		<item key="updateSimilarElements" value="false"/>
+		<item key="renameSetter" value="true"/>
+		<item key="patterns" value=""/>
+		<item key="renameGetter" value="true"/>
+		<item key="updateTextualMatches" value="true"/>
+		<item key="updateQualifiedNames" value="false"/>
+	</section>
+</section>

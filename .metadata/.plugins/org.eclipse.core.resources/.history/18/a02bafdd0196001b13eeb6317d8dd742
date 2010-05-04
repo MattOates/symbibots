@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package ga;
+
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public interface Symbiosis {
+	
+	/**
+	 * 
+	 * @param population
+	 * @return
+	 */
+	public LinkedList<Agent> symbiose(LinkedList<Agent> population);
+	
+	/*
+	 * 
+	 */
+	public String toInfoString();
+	
+}

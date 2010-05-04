@@ -1,0 +1,34 @@
+/**
+ * 
+ */
+package ga.selection;
+
+import java.util.LinkedList;
+
+import ga.GeneticAlgorithm;
+import ga.Selection;
+import game.Agent;
+
+/**
+ * @author matt
+ *
+ */
+public class TournamentSelection implements Selection {
+
+	/* (non-Javadoc)
+	 * @see ga.Selection#select(ga.GeneticAlgorithm)
+	 */
+	public LinkedList<Agent> select(GeneticAlgorithm ga) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see ga.Selection#toInfoString()
+	 */
+	public String toInfoString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

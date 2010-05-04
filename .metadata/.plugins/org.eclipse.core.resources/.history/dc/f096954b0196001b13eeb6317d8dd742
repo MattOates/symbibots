@@ -1,0 +1,12 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public interface Symbiosis {
+
+}

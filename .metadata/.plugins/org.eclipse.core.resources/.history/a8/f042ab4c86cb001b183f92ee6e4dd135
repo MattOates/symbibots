@@ -1,0 +1,148 @@
+/**
+ * 
+ */
+package ga;
+
+import game.Agent;
+import game.Entity;
+import game.EntityManager;
+import game.World;
+import java.util.LinkedList;
+
+/**
+ * @author  matt
+ */
+public class GeneticAlgorithm {
+	
+	//Epoch time in milliseconds
+	private int epochTime = 300000;
+	private int goalFitness = 10;
+	
+	public static int populationSize = 10;
+	public static int chromosomeSize = 5;
+	
+	private double crossoverProbability = 0.8;
+	private double geneMutationProbability = 0.1;
+	private double alleleMutationProbability = 0.5;
+	private double symbioticProbability = 0.4;
+	
+	//Operators
+	private Selection select = null;
+	private Crossover cross = null;
+	private Symbiosis symb = null;
+	
+	private LinkedList<Agent> population = null;
+	
+	/**
+	 * Create a GA with good default parameters and genetic operators.
+	 * Other constructors used with user dialogue for tayloring the GA.
+	 */
+	public GeneticAlgorithm() {
+		super();
+		this.manager = manager;
+		select = GeneticAlgorithmFactory.getSelection("Roulette");
+		cross = GeneticAlgorithmFactory.getCrossover("SinglePoint");
+		symb = GeneticAlgorithmFactory.getSymbiosis("PerfectHorizontal");
+		population = new LinkedList<Agent>();
+		for (int index = 0; index < populationSize; index++) {
+			population.add(new Agent());
+		}
+	}
+	
+	public GeneticAlgorithm(Selection select, Crossover cross) {
+		
+	}
+	
+	public GeneticAlgorithm(Selection select, Crossover cross, Symbiosis symb) {
+		
+	}
+	
+	public void newEpoch() {
+		//Select parents for the new population.
+		for (Agent agent : population) agent.calcFitness();
+		LinkedList<Agent> selected = select.select(this);
+		
+		System.out.println("* Selected:");
+		System.out.println(selected);
+		population = new LinkedList<Agent>();
+		
+		//Crossover the parents selected to produce children in the new generation
+		while (population.size() < populationSize) {
+			for (Agent mother : selected) {
+				Agent father = mother;
+				
+				//Do we crossover?
+				if (crossoverProbability <= Math.random()) {
+					
+					/*Makesure we don't cross the same parents.
+					  Can be a problem if we have a small number of agents and only
+					  one has a fitness greater than 0. If this happens we will get
+					  in to an infinite loop because the selected population only
+					  contains one agent either once or multiple times.
+					  In testing this came up with a population of 3 and testing
+					  for the presence of one specific gene as a measure of fitness.
+					  In practice this should never really be a problem.
+					 */
+					while (mother ==  father)father = getRandomAgent(selected);
+					
+					Chromosome[] child = cross.cross(mother.getChromosome(), father.getChromosome());
+					
+					System.out.println(child[0]);
+					System.out.println(child[1]);
+					System.out.println();
+					
+					//Add the children to the population
+					if ((populationSize - population.size()) % 2 == 0) {
+						//Mutate the child chromosomes before creating the new agents
+						child[0].mutate(alleleMutationProbability, geneMutationProbability);
+						child[1].mutate(alleleMutationProbability, geneMutationProbability);
+						population.add(new Agent(manager, child[0]));
+						population.add(new Agent(manager, child[1]));
+					}
+					else {
+						//Mutate the child chromosomes before creating the new agents
+						child[0].mutate(alleleMutationProbability, geneMutationProbability);
+						population.add(new Agent(manager, child[0]));
+					}
+				}
+			}
+		}
+		manager.unregisterAll(population);
+	}
+	
+	private Agent getRandomAgent(LinkedList<Agent> agents) {
+		return agents.get( (int) Math.round( Math.random() * (agents.size() -1) ) );
+	}
+	
+	private void mutateGenes() {
+		
+	}
+	
+	private void mutateAlleles() {
+		
+	}
+
+	/**
+	 * @return  the population
+	 */
+	public LinkedList<Agent> getPopulation() {
+		return population;
+	}
+
+	/**
+	 * @param population  the population to set
+	 */
+	public void setPopulation(LinkedList<Agent> population) {
+		this.population = population;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return population.toString();
+	}
+	
+	
+}

@@ -1,0 +1,84 @@
+/**
+ * 
+ */
+package game;
+
+import ga.Chromosome;
+import ga.GeneticAlgorithm;
+
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import javax.swing.ImageIcon;
+
+/**
+ * @author matt
+ *
+ */
+public class UserAgent extends Agent implements KeyListener {
+	
+	private LinkedList<Chromosome> chromosomes = new LinkedList<Chromosome>();
+	
+	private HashMap<Character,Integer> keymap = new HashMap<Character,Integer>();
+	
+	public UserAgent(){}
+	
+	public UserAgent(EntityManager manager) {
+		super(manager, Chromosome.getDefaultUserChromosome());
+		graphic = new ImageIcon("images/player.png");
+		position = new Point2D.Double(GeneticAlgorithm.getRandNum() * manager.getWorld().getWidth(), GeneticAlgorithm.getRandNum() * manager.getWorld().getHeight());
+		dimension = new Dimension(graphic.getIconWidth(),graphic.getIconHeight());
+		shape = new Ellipse2D.Double(position.x - dimension.width/2, position.y - dimension.height/2, dimension.width, dimension.height);
+		shape.setFrameFromCenter(position.x, position.y, position.x + dimension.width/2, position.y + dimension.height/2);
+		keymap.put('1', 0);
+	}
+	
+	
+	public void keyPressed(KeyEvent ekey) {}
+	public void keyReleased(KeyEvent ekey) {}
+
+	public void keyTyped(KeyEvent ekey) {
+		System.out.println("Got a key press");
+		if (keymap.containsKey(ekey.getKeyChar())) {
+			int index = keymap.get(ekey.getKeyChar());
+			chromosomes.get(index).express();
+			manager.getWorld().getUi().addLog("Expressing user chromosome #"+(index + 1));
+		}
+	}
+	
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuffer string = new StringBuffer();
+		string.append("X: "+(int)position.x);
+		string.append("\n");
+		string.append("Y: "+(int)position.y);
+		string.append("\n");
+		string.append("Distance traveled: "+(int)distanceTraveled);
+		string.append("\n\n");
+		string.append("Life: "+life);
+		string.append("\n");
+		string.append("Energy: "+energy);
+		string.append("\n\n");
+		string.append("Missiles fired: "+numOfMissilesFired);
+		string.append("\n");
+		string.append("Missiles hit: "+numOfMissileHits);
+		string.append("\n\n");
+		string.append("Life healed: "+numOfLifeHealed);
+		string.append("\n");
+		string.append("Energy collected: "+numOfEnergyCollected);
+		string.append("\n");
+		for(Chromosome chromosome : chromosomes) {
+			string.append(chromosome.toString());
+			string.append("\n");
+		}
+		return string.toString();
+	}
+}

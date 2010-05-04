@@ -1,0 +1,27 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public interface Crossover {
+	
+	/**
+	 * Takes two chromosomes and returns the two sexualy crossed daughters.
+	 * @param mother
+	 * @param father
+	 * @return
+	 */
+	public Chromosome[] cross(Chromosome mother, Chromosome father);
+	
+	/**
+	 * Give an information string about the specifics of this Crossover method, must be suitable
+	 * for use in the user interface.
+	 * @return
+	 */
+	public String toInfoString();
+
+}

@@ -1,0 +1,16 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public abstract class Crossover {
+	
+	public abstract Chromosome[] cross(Chromosome mother, Chromosome father);
+	
+	public abstract String toInfoString();
+
+}

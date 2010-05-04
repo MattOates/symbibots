@@ -1,0 +1,302 @@
+/**
+ * A class that lets the user draw with the mouse. The
+ * window knows how to redraw itself.
+ */
+
+import org.kde.qt.*;
+
+public class ScribbleWindow extends QWidget {
+	
+	public static final int COLOR_MENU_ID_BLACK = 0;
+	public static final int COLOR_MENU_ID_RED = 1;
+	public static final int COLOR_MENU_ID_BLUE = 2;
+	public static final int COLOR_MENU_ID_GREEN = 3;
+	public static final int COLOR_MENU_ID_YELLOW = 4;
+	
+	private QMenuBar _menubar;
+	private QPopupMenu _filemenu;
+	private QPopupMenu _colormenu;
+	private QPopupMenu _helpmenu;
+	private QScrollView _scrollview;
+	private ScribbleArea _scribblearea;
+	
+	public class ScribbleArea extends QWidget {
+	    private QPoint _last;
+	    private QColor _currentcolor;
+	
+	    private QPixmap _buffer;
+	    private QPopupMenu _popupmenu;
+	
+		/**
+		  * The constructor. Initializes the member variables.
+		  */
+		ScribbleArea()
+		{
+			// initialize member variables
+			_buffer = new QPixmap();
+			_last = new QPoint();
+			_currentcolor = black();
+			
+			// don't blank the window before repainting
+			setBackgroundMode( NoBackground );
+			
+			// create a pop-up menu
+			_popupmenu = new QPopupMenu();
+			_popupmenu.insertItem( "&Clear", this, SLOT( "slotClearArea()" ) );
+		}
+		
+		/**
+		  * This slot sets the curren color for the scribble area. It will be
+		  * connected with the colorChanged( QColor ) signal from the
+		  * ScribbleWindow.
+		  */
+		public void setColor( QColor new_color )
+		{
+			_currentcolor = new_color;
+		}
+		
+		/**
+		 * This slot clears the drawing area by filling the off-screen buffer with
+		 * white and copying it over to the window.
+		 */
+		public void slotClearArea()
+		{
+			// fill the off screen buffer with plain white
+			_buffer.fill( white() );
+			
+			// and copy it over to the window
+			bitBlt( this, 0, 0, _buffer );
+		}
+		
+		
+		/**
+		  * This method does the actual loading. It relies on QPixmap (and the
+		  * underlying I/O machinery) to determine the filetype.
+		  */
+		public void slotLoad( String filename )
+		{
+			if ( !_buffer.load( filename ) )
+				QMessageBox.warning( null, "Load error", "Could not load file" );
+				
+			repaint();  // refresh the window
+		}
+		
+		
+		/**
+		 * This method does the actual saving. We hard-code the file type as
+		 * BMP. Unix users might want to replace this with something like XPM.
+		 */
+		public void slotSave( String filename )
+		{
+			if( !_buffer.save( filename, "BMP" ) )
+				QMessageBox.warning( null, "Save error", "Could not save file" );
+		}
+		
+		
+		/**
+		  * This method is called whenever the user presses the
+		  * mouse over the window. It just records the position of the mouse
+		  * at the time of the click.
+		  */
+		protected void mousePressEvent(QMouseEvent event)
+		{
+			if ( event.button() == RightButton )
+				_popupmenu.exec( QCursor.pos() );
+			else
+			  {
+				_last = event.pos();	// retrieve the coordinates from the event
+			  }
+		}
+		
+		
+		/**
+		  * The method is called whenever the usr moves the mouse
+		  * while the mouse button is pressed. If we had called
+		  * setMouseTracking(true) before, the method would also be called
+		  * when the mouse was moved with any button pressed. We know that
+		  * we haven't, and thus don't have to check whether any buttons are
+		  * pressed.
+		  */
+		protected void mouseMoveEvent(QMouseEvent event) {
+			// create a QPainter object for drawing onto the window
+			QPainter windowpainter = new QPainter();
+			// and another QPainter object for drawing int an off-screen pixmap
+			QPainter bufferpainter = new QPainter();
+			
+			// start painting
+			windowpainter.begin( this ); // this painter paints onto the window
+			bufferpainter.begin( _buffer );  // and this one paints in the buffer
+		
+			// set a standard pen with the currently selected color
+			windowpainter.setPen( _currentcolor );
+			bufferpainter.setPen( _currentcolor );
+		
+			// draw a line in both the window and the buffer
+			windowpainter.drawLine( _last, event.pos() );
+			bufferpainter.drawLine( _last, event.pos() );
+		
+			// done with painting
+			windowpainter.end();
+			bufferpainter.end();
+		
+			// remember the current mouse position
+			_last = event.pos();						
+		}
+		/**
+		  * This method is called whenever the widget needs
+		  * painting, for example when it has been obscured and then revealed again.
+		  */
+		protected void paintEvent(QPaintEvent event) {
+			bitBlt(this, 0, 0, _buffer);
+		}
+	
+		/**
+		  * This method get called whenever the widget needs
+		  * painting, for example, when it has been obscured and then revealed again.
+		  */
+		protected void resizeEvent(QResizeEvent event) {
+			QPixmap save = new QPixmap( _buffer );
+			_buffer.resize( event.size() );
+			_buffer.fill( white() );
+			bitBlt( _buffer, 0, 0, save );
+		}
+	}
+	
+	ScribbleWindow()
+	{
+		/* The next lines build the menu bar. We first create the menus
+		* one by one, then add them to the menu bar. */
+		_filemenu = new QPopupMenu();  // create a file menu
+		_filemenu.insertItem( "&Load", this, SLOT( "slotLoad()" ) );
+		_filemenu.insertItem( "&Save", this, SLOT( "slotSave()" ) );
+		_filemenu.insertSeparator();
+		_filemenu.insertItem( "&Quit", qApp(), SLOT( "quit()" ) );
+		
+		_colormenu = new QPopupMenu(); // create a color menu
+		_colormenu.insertItem( "B&lack", COLOR_MENU_ID_BLACK);
+		_colormenu.insertItem( "&Red", COLOR_MENU_ID_RED);
+		_colormenu.insertItem( "&Blue", COLOR_MENU_ID_BLUE);
+		_colormenu.insertItem( "&Green", COLOR_MENU_ID_GREEN);
+		_colormenu.insertItem( "&Yellow", COLOR_MENU_ID_YELLOW);
+		QObject.connect( _colormenu, SIGNAL( "activated( int )" ),
+						 this, SLOT( "slotColorMenu( int )" ) );
+						
+		_helpmenu = new QPopupMenu();  // create a help menu
+		_helpmenu.insertItem( "&About QtScribble", this, SLOT( "slotAbout()" ) );
+		_helpmenu.insertItem( "&About Qt", this, SLOT( "slotAboutQt()" ) );
+		
+		_menubar = new QMenuBar( this, "" );  // create a menu bar
+		_menubar.insertItem( "&File", _filemenu );
+		_menubar.insertItem( "&Color", _colormenu );
+		_menubar.insertItem( "&Help", _helpmenu );
+		
+		/* We create a QScrollView and a ScribbleArea. The ScribbleArea will
+		 * be managed by the scroll view.*/
+		_scrollview = new QScrollView( this );
+		_scrollview.setGeometry( 0, _menubar.height(),
+		 							width(), height() - _menubar.height() );
+		_scribblearea = new ScribbleArea();
+		_scribblearea.setGeometry( 0, 0, 1000, 1000 );
+		_scrollview.addChild( _scribblearea );
+		QObject.connect( this, SIGNAL( "colorChanged( QColor )" ),
+						 _scribblearea, SLOT( "setColor( QColor )" ) );
+		QObject.connect( this, SIGNAL( "save( String )" ),
+						 _scribblearea, SLOT( "slotSave( String )" ) );
+		QObject.connect( this, SIGNAL( "load(String)" ),
+						 _scribblearea, SLOT( "slotLoad( String )" ) );
+	}
+	
+	protected void resizeEvent( QResizeEvent event )
+	{
+		/* When the whole window is resized, we have to rearrange the geometry
+		 * in the ScribbleWindow as well. Note that the ScribbleArea does not need
+		 * to be changed. */
+		 _scrollview.setGeometry( 0, _menubar.height(),
+		 							width(), height() - _menubar.height() );
+	}
+
+	
+	
+	private void slotAbout()
+	{
+		QMessageBox.information( this, "About QtScribble 5",
+										"This is the Scribble 5 application\n" +
+										"Copyright 1998 by Mathias Kalle Dalheimer\n"
+										);
+	}
+	
+	private void slotAboutQt()
+	{
+		QMessageBox.aboutQt( this, "About Qt" );
+	}
+	
+	private void slotColorMenu( int item )
+	{
+		switch( item )
+		{
+			case COLOR_MENU_ID_BLACK:
+				emit("colorChanged", black());
+				break;
+			case COLOR_MENU_ID_RED:
+				emit("colorChanged", darkRed());
+				break;
+			case COLOR_MENU_ID_BLUE:
+				emit("colorChanged", darkBlue());
+				break;
+			case COLOR_MENU_ID_GREEN:
+				emit("colorChanged", darkGreen());
+				break;
+			case COLOR_MENU_ID_YELLOW:
+				emit("colorChanged", yellow());
+				break;
+		}
+	}
+	
+	
+	/**
+	  * This is the slot for the menu item File/Load. It opens a
+	  * QFileDialog to ask the user for a filename, then emits a save()
+	  * signal with the filename as parameter.
+	  */
+	private void slotLoad()
+	{
+		/* Open a file dialog for loading. The default directory is the
+		 * current directory, the filter *.bmp.
+		 */
+		String filename = QFileDialog.getOpenFileName( ".", "*.bmp", this );
+		if ( !filename.equals("") )
+			emit("load", filename);
+	}
+	
+	/**
+	  * This is the slot for the menu item File/Load. It opens a
+	  * QFileDialog to ask the user for a filename, then emits a save()
+	  * signal with the filename as parameter.
+	  */
+	private void slotSave()
+	{
+		/* Open a file dialog for saving. The default directory is the
+		 * current directory, the filter *.bmp.
+		 */
+		String filename = QFileDialog.getSaveFileName( ".", "*.bmp", this );
+		if ( !filename.equals("") )
+			emit("save", filename);
+	}
+	
+
+	public static void main(String[] args)
+	{
+		QApplication myapp = new QApplication(args);
+		ScribbleWindow mywidget = new ScribbleWindow();
+		mywidget.setGeometry(50, 500, 400, 400);
+
+		myapp.setMainWidget(mywidget);
+		mywidget.show();
+		myapp.exec();
+		return;
+	}
+	
+	//static {
+		qtjava.initialize();
+	//}
+}

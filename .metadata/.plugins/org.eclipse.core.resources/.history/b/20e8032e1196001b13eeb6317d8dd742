@@ -1,0 +1,55 @@
+/**
+ * 
+ */
+package ga;
+
+import game.Agent;
+
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public class GeneticAlgorithm {
+	
+	private GeneticAlgorithmParams params;
+	
+	private Selection select;
+	
+	private Crossover cross;
+	
+	private Symbiosis symb;
+	
+	private LinkedList<Agent> population;
+	
+	public GeneticAlgorithm() {
+		super();
+		params = new GeneticAlgorithmParams();
+		select = GeneticAlgorithmFactory.getSelection("Roulette");
+		cross = GeneticAlgorithmFactory.getCrossover("SinglePoint");
+		symb = GeneticAlgorithmFactory.getSymbiosis("PerfectHorizontal");
+		population = new LinkedList<Agent>();
+		for (int index = 0; index < params.getPopSize(); index++) {
+			population = new Agent();
+		}
+	}
+	
+	public GeneticAlgorithm(GeneticAlgorithmParams params) {
+		
+	}
+	
+	public GeneticAlgorithm(GeneticAlgorithmParams params, Selection select, Crossover cross) {
+		
+	}
+	
+	public GeneticAlgorithm(GeneticAlgorithmParams params, Selection select, Crossover cross, Symbiosis symb) {
+		
+	}
+	
+	
+	
+	public void newEpoch() {
+		
+	}
+}

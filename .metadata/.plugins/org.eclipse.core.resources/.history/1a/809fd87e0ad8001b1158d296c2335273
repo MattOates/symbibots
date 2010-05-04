@@ -1,0 +1,327 @@
+/**
+ * The main GUI container for the Symbibots game. 
+ */
+package ui;
+
+import ga.GeneticAlgorithm;
+import game.Agent;
+import game.World;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+
+import vis.VisualisationPanel;
+
+/**
+ * @author  matt
+ */
+public class MainWindow extends JFrame implements ActionListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 382592117767573017L;
+	
+	/**
+	 * VisualisationPanel, panel rendering the game graphics.
+	 */
+	private VisualisationPanel vispan = new VisualisationPanel();
+	
+	/**
+	 * SidePanel, context sensitive panel for added human interaction.
+	 */
+	private SidePanel sidepan = new SidePanel();
+	
+	/**
+	 * GADialog, edit the operators and starting parameters of a GA.
+	 */
+	private GADialog dialog;
+	
+	/**
+	 * TextArea to dump logged strings from backend.
+	 */
+	private JTextArea log = new JTextArea(5, 50);
+	
+	/**
+	 * Allow the log to be pull off'able.
+	 */
+	private JToolBar logbar = new JToolBar("Symbibots - Log");
+	
+	/**
+	 * ScrollPane to allow resizing of the log.
+	 */
+	private JScrollPane logscroll = new JScrollPane(log);
+	
+	private JProgressBar epochprogress = new JProgressBar();
+	
+	private JToggleButton pause = new JToggleButton("Pause");
+	
+	private boolean ready = false;
+
+	public boolean paused = true;
+	
+	private Thread gameloop;
+	
+	private World world;
+	
+	public MainWindow(String title) throws HeadlessException {
+		super(title);
+		setDefaultLookAndFeelDecorated(true);
+		//setIconImage(new ImageIcon("app.gif").getImage());
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		//setup size and location of frame
+		int screenwidth = 
+			(int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+		int screenheight = 
+			(int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+		setSize((3*screenwidth)/4,(3*screenheight)/4);
+		setLocation(screenwidth/8,screenheight/8);
+		
+		addContent();
+		//pack();
+		setVisible(true);
+		
+		//String user = JOptionPane.showInputDialog(null, "What is your username?");
+		
+		File profiles = new File("profiles");
+		//Get a list of all the GeneClasses available in the Genes package.
+		/*File[] users = profiles.listFiles(new DirectoryFilter());
+		boolean newuser = true;
+		for (File user : users) {
+			user.getName() != username;
+		}
+		String username = gui.userPrompt();*/
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		MainWindow win = new MainWindow("Symbibots v0.1");
+		win.addContent();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		addLog("Pause button" + pause.isSelected());
+		if (e.getActionCommand() == "View Genes") {
+			ready = true;
+			paused = !paused;
+			sidepan.setBackground(new Color((int)(255 * Math.random()), (int)(255 * Math.random()), (int)(255 * Math.random())));
+		}		
+		else if (e.getActionCommand() == "Exit") {
+			System.exit(0);
+		}
+		else if (e.getActionCommand() == "New") {
+			setupNewGame();
+		}
+		else if (e.getActionCommand() == "Pause") {
+			JToggleButton source = (JToggleButton)e.getSource();
+			if (source.isSelected()) {
+				paused = true;
+				pause.setSelected(paused);
+			}
+			else {
+				paused = false;
+				pause.setSelected(paused);
+			}
+		}
+		else if (e.getActionCommand() == "GA...") {
+			dialog.setVisible(true);
+			if (dialog.isAccepted()) {
+				dialog.setGA(world.getGa());
+			}
+		}
+	}
+	
+	public void addContent() {
+		getContentPane().setLayout(new BorderLayout());		
+		
+		//Setup GA dialog.
+		dialog = new GADialog(this);
+		dialog.pack();
+		
+		//Stop the user editing the log. 
+		log.setEditable(false);
+		log.setLineWrap(false);
+		log.setBackground(new Color(0,0,0));
+		log.setForeground(new Color(0,255,0));
+		
+		//Setup the logbar
+		logbar.setLayout(new BorderLayout());
+		
+		epochprogress.setStringPainted(true);
+		epochprogress.setToolTipText("Current game epoch progress.");
+		
+		pause.addActionListener(this);
+		pause.setSelected(paused);
+		
+		addLog("Pause button" + pause.isSelected());
+		logbar.add(epochprogress, BorderLayout.NORTH);
+		logbar.add(pause, BorderLayout.WEST);
+		logbar.add(logscroll, BorderLayout.CENTER);
+		
+		getContentPane().add(vispan, BorderLayout.CENTER);
+		getContentPane().add(sidepan, BorderLayout.WEST);
+		getContentPane().add(logbar, BorderLayout.SOUTH);
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenuItem item;
+	    JMenu menu;
+	    
+	    // Create File menu
+	    menu= new JMenu("File");
+	    menu.setMnemonic('F');
+	    	item = new JMenuItem("New");
+	    		item.setMnemonic('N');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images/filenew.png"));
+    			menu.add(item);
+	    	item = new JMenuItem("Open...");
+	    		item.setMnemonic('O');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images/fileopen.png"));
+	    		menu.add(item);
+	    	item = new JMenuItem("Save...");
+	    		item.setMnemonic('S');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images/filesaveas.png"));
+	    		menu.add(item);
+	    	item = new JMenuItem("Exit");
+	    		item.setMnemonic('x');
+	    		item.addActionListener(this);
+	    		item.setIcon(new ImageIcon("images/exit.png"));
+	    		menu.add(item);
+	    
+	    //Add the menu to the bar
+	    menuBar.add(menu);
+	    
+	    //Create Edit menu
+	    menu= new JMenu("Edit");
+	    menu.setMnemonic('E');
+	    	item = new JMenuItem("GA...");
+	    		item.setMnemonic('G');
+    			item.addActionListener(this);
+    			item.setIcon(new ImageIcon("images/wizard.png"));
+    			menu.add(item);
+    	
+    	//Add the menu to the bar
+	    menuBar.add(menu);
+	    
+	    //Install the menu bar in the frame
+	    setJMenuBar(menuBar);
+	    
+	    
+	    //Create Agent context popupmenu
+	    final JPopupMenu agentmenu = new JPopupMenu();
+	    agentmenu.setBorderPainted(false);
+	    item = new JMenuItem("View Genes");
+	    item.setToolTipText("View a game agents geneome in the side bar.");
+	    item.addActionListener(this);
+	    agentmenu.add(item);
+	    agentmenu.add(new JMenuItem("Cancel"));
+	    
+	    // Set the component to show the popup menu
+	    vispan.addMouseListener(new MouseAdapter() {
+	        public void mousePressed(MouseEvent evt) {
+	        	paused = true;
+	            if (evt.isPopupTrigger()) {
+	                int x, y;
+	                x = evt.getX(); y = evt.getY();
+	            	agentmenu.show(evt.getComponent(), x, y);
+	                addLog("X: "+x+" Y: "+y);
+	            }
+	        }
+	        public void mouseReleased(MouseEvent evt) {
+	            if (evt.isPopupTrigger()) {
+	                agentmenu.show(evt.getComponent(), evt.getX(), evt.getY());
+	            }
+	        }
+	    });
+	    
+		
+	}
+	
+	private void setupNewGame() {
+		dialog.setVisible(true);
+		if (dialog.isAccepted()) {
+			GeneticAlgorithm ga = new GeneticAlgorithm();
+			dialog.setGA(ga);
+			addLog(ga.toString());
+			World world = new World(ga,this);
+			gameloop = new Thread(world);
+			gameloop.start();
+		}
+	}
+	
+	/**
+	 * Add a message to the log box on screen.
+	 * @param string
+	 */
+	public synchronized void addLog(String string) {
+		log.append(string+"\n");
+	}
+
+	/**
+	 * Show a message on screen that a new epoch or game round has started.
+	 * The next generation of agents has just been created.
+	 */
+	public void showNewEpoch() {
+		// TODO display a message shoing a new epoch has started, needs to be non blocking.
+		
+	}
+	
+	public void updateEpochProgress(int start, int finish, int current) {
+		epochprogress.setMinimum(start);
+		epochprogress.setMaximum(finish);
+		epochprogress.setValue(current);
+	}
+
+	private class DirectoryFilter extends FileFilter {
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.filechooser.FileFilter#accept()
+		 */
+		@Override
+		public boolean accept(File file) {
+			return file.isDirectory();
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.filechooser.FileFilter#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return "Get all directories.";
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isReadyForGame() {
+		return ready;
+	}
+
+	/**
+	 * @return the paused
+	 */
+	public boolean isPaused() {
+		return paused;
+	}
+
+	/**
+	 * @param paused the paused to set
+	 */
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+
+}

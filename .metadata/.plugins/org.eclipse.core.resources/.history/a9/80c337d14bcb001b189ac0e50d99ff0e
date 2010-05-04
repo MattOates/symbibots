@@ -1,0 +1,38 @@
+/**
+ * 
+ */
+package game;
+
+import java.util.LinkedList;
+
+/**
+ * @author matt
+ *
+ */
+public class EntityManager {
+	
+	private LinkedList<Entity> ents = new LinkedList<Entity>();
+	
+	public EntityManager () {
+		
+	}
+	
+	public void update() {
+		for (Entity ent : ents) {
+			ent.update();
+		}
+	}
+	
+	public void checkCollision() {
+		for (Entity ent1 : ents) {
+			for (Entity ent2 : ents) {
+				//Don't collide with self
+				if (ent1 == ent2) continue;
+				if (ent1.getBounds().intersects(ent2.getBounds().getBounds2D())) {
+					ent1.collide(ent2);
+				}
+			}
+		}
+	}
+	
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<session version="1.0">
+<refactoring comment="Rename type 'ga.ChromosomeFactory' to 'GeneFactory'&#10;- Original element: 'ga.ChromosomeFactory'&#10;- Renamed element: 'ga.GeneFactory'&#10;- Update references to refactored element&#10;- Rename similarly named elements&#10;- Update textual occurrences in comments and strings" description="Rename type 'ChromosomeFactory'" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/&lt;ga{ChromosomeFactory.java[ChromosomeFactory" matchStrategy="1" name="GeneFactory" qualified="false" references="true" similarDeclarations="true" stamp="1166962218338" textual="false" version="1.0"/>
+</session>

@@ -1,0 +1,21 @@
+/**
+ * 
+ */
+package ga;
+
+/**
+ * @author matt
+ *
+ */
+public class GeneticAlgorithmParams {
+	
+	private int epochTime;
+	private int goalFitness;
+	
+	private int popSize;
+	
+	private float probCross;
+	private float probMuta;
+	private float probSymbi;
+	
+}
