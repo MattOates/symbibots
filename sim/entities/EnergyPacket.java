@@ -77,7 +77,7 @@ public class EnergyPacket extends Entity {
 	@Override
 	public void collide(Entity entity) {
 		//Do nothing if the energy packet is in the inactive state
-		if (inactive) return;
+		if (inactive || entity.isInactive()) return;
 		
 		//Give the agent some energy and then remove this packet from the game
 		if (entity instanceof Agent) {

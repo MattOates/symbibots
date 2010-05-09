@@ -1,4 +1,4 @@
-package sim;
+package sim.agents;
 
 import ga.Chromosome;
 import ga.GeneticAlgorithm;
@@ -14,6 +14,9 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import sim.Agent;
+import sim.Entity;
+import sim.EntityManager;
 import sim.entities.EnergyPacket;
 import sim.entities.Missile;
 import ui.AgentPanel;
@@ -22,7 +25,7 @@ import ui.AgentPanel;
  * An Agent acted upon by both the World model and the GA.
  * @author  Matt Oates 
  */
-public class Agent extends Entity {
+public class EpuckRobotAgent extends Agent {
 	
 	private LinkedList<Chromosome> chromosomes = new LinkedList<Chromosome>();
 	
@@ -55,9 +58,9 @@ public class Agent extends Entity {
 	/**
 	 * Default constructor used in XML serialization
 	 */
-	public Agent(){}
+	public EpuckRobotAgent(){}
 	
-	public Agent(EntityManager manager) {
+	public EpuckRobotAgent(EntityManager manager) {
 		super(manager, Entity.WALL_WRAP);
 		position = new Point2D.Double(GeneticAlgorithm.random() * manager.getWorld().getWidth(), GeneticAlgorithm.random() * manager.getWorld().getHeight());
 		dimension = new Dimension(40,40);
@@ -66,7 +69,7 @@ public class Agent extends Entity {
 		chromosomes.add(new Chromosome(this));
 	}
 	
-	public Agent(EntityManager manager, Chromosome chromosome) {
+	public EpuckRobotAgent(EntityManager manager, Chromosome chromosome) {
 		//TODO this(manager); BUG Cannot use this otherwise we get another random chromosome as the sexual chromosome and the inherited chromosome as a symbiont!
 		super(manager, Entity.WALL_WRAP);
 		position = new Point2D.Double(GeneticAlgorithm.random() * manager.getWorld().getWidth(), GeneticAlgorithm.random() * manager.getWorld().getHeight());
@@ -77,10 +80,6 @@ public class Agent extends Entity {
 		chromosomes.add(chromosome);
 	}
 	
-	public Agent(EntityManager manager, int wallWrap) {
-		super(manager, wallWrap);
-	}
-
 	/**
 	 * Overridden to allow for distance traveled acounting. 
 	 * @see sim.Entity#update()
@@ -201,15 +200,15 @@ public class Agent extends Entity {
 	@Override
 	public void collide(Entity entity) {
 		//Do nothing if the Agent is in the inactive state
-		if (inactive || entity.inactive) return;
+		if (inactive || entity.isInactive()) return;
 		
 		if (entity instanceof Agent) {
 			
 			//Change direction of both agents
 			dx *= -1;
 			dy *= -1;
-			entity.dx *= -1;
-			entity.dy *= -1;
+			entity.setDx(entity.getDx() * -1);
+			entity.setDy(entity.getDy() * -1);
 			
 			//Bounce horizontaly
 			if (position.x < entity.getPosition().getX()) {

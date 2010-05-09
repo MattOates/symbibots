@@ -23,6 +23,8 @@ public class World implements Runnable, Visualisable {
 	public static boolean IS_TEST = false;
 	
 	public static boolean IS_DATA_RUN = false;
+	
+	public static boolean IS_DEBUG_VISUALISATION = false;
 
 	private int energySpawn = 20;
 	

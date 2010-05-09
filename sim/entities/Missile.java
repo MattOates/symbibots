@@ -45,7 +45,7 @@ public class Missile extends Entity {
 	@Override
 	public void collide(Entity entity) {
 		//Do nothing if the missile is in the inactive entity state
-		if (inactive) return;
+		if (inactive || entity.isInactive()) return;
 		
 		//Missiles only hit Agents
 		if (entity instanceof Agent) {

@@ -160,6 +160,10 @@ public class MainWindow extends JFrame implements ActionListener {
 			JCheckBoxMenuItem item = (JCheckBoxMenuItem)e.getSource();
 			World.IS_DATA_RUN = item.getState();
 		}
+		else if (e.getActionCommand() == "Debug Visualisation") {
+			JCheckBoxMenuItem item = (JCheckBoxMenuItem)e.getSource();
+			World.IS_DEBUG_VISUALISATION = item.getState();
+		}
 		else if (e.getActionCommand() == "Test Output") {
 			JCheckBoxMenuItem item = (JCheckBoxMenuItem)e.getSource();
 			World.IS_TEST = item.getState();
@@ -291,6 +295,11 @@ public class MainWindow extends JFrame implements ActionListener {
 			item = new JCheckBoxMenuItem("Data Run");
 				item.setSelected(false);
 				item.setMnemonic('D');
+				item.addActionListener(this);
+				menu.add(item);
+			item = new JCheckBoxMenuItem("Debug Visualisation");
+				item.setSelected(false);
+				item.setMnemonic('V');
 				item.addActionListener(this);
 				menu.add(item);
 			item = new JCheckBoxMenuItem("Test Output");
